@@ -2,7 +2,11 @@
 #include <boost/json.hpp>
 #include <boost/json/stream_parser.hpp>
 #include <iomanip>
+#include <iostream>
 #include <fstream>
+#include <vector>
+#include <utility>
+#include <string>
 
 #include "graph.hpp"
 
@@ -75,18 +79,41 @@ ParseFile( char const* filename )
 my::ColoredGraph
 ReadColoredGraph(json::value const& jv)
 {
-    my::ColoredGraph G;
-    if (jv.kind() != json::kind::object) return G;
+    if (jv.kind() != json::kind::object) return my::ColoredGraph();
     
     auto const& obj = jv.get_object();
     if(!obj.empty())
     {
         auto it = obj.begin();
-        for(;it != obj.end();++it)
+        auto const name = it->key();
+        if (name != "Name") return my::ColoredGraph();
+        ++it;
+        if (it->key() != "Vertices" ||
+            it->value().kind() != json::kind::object) return my::ColoredGraph();
+        auto const& vertObj = it->value().get_object();
+        if (!vertObj.empty())
         {
-            
+            std::vector<std::pair<size_t, size_t> > pairList;
+            size_t vertNum = 0;
+
+            for ( auto const& vertIt : vertObj )
+            {
+                size_t vertex = std::stoi(std::string(vertIt.key()));
+                ++vertNum;
+                if (vertIt.value().kind() != json::kind::array) return my::ColoredGraph();
+                auto const& arrVert = vertIt.value().get_array();
+                for (auto const& arrVertIt : arrVert)
+                {
+                    if (arrVertIt.kind() != json::kind::int64) return my::ColoredGraph();
+                    pairList.emplace_back(vertex, arrVertIt.get_int64());
+                    std::cout << vertex << '\t' << arrVertIt.get_int64() << std::endl;
+                }
+            }
+
+            return my::ColoredGraph(pairList.begin(), pairList.end(),
+                                vertNum);
         }
     }
-    return G;
+    return my::ColoredGraph();
 }
 }
