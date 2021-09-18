@@ -6,18 +6,15 @@ int main(int argc, char ** argv) {
     if(argc != 2)
     {
         std::cerr <<
-            "Usage: pretty <filename>"
+            "Usage: program <filename>"
             << std::endl;
         return EXIT_FAILURE;
     }
 
     try
     {
-        // Parse the file as JSON
-        auto const jv = my_parser::parse_file( argv[1] );
-
-        // Now pretty-print the value
-        my_parser::pretty_print(std::cout, jv);
+        auto const jv = my_parser::ParseFile( argv[1] );
+        auto resGraph = my_parser::ReadColoredGraph(jv);
     }
     catch(std::exception const& e)
     {

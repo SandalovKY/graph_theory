@@ -5,8 +5,7 @@
 
 namespace my
 {
-using vertex_color_p = boost::property<boost::vertex_color_t, size_t>;
-using edge_index_p = boost::property<boost::edge_index_t, size_t>;
-using graph_representation = boost::adjacency_list<boost::vecS, boost::listS, boost::undirectedS,
-                                                   edge_index_p, vertex_color_p>;
+using Vertex_color_p = boost::property<boost::vertex_color_t, size_t>;
+using ColoredGraph = boost::adjacency_list<boost::vecS, boost::listS, boost::undirectedS,
+                                                   Vertex_color_p, boost::no_property>;
 } // namsepace my

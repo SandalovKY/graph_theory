@@ -10,8 +10,43 @@ namespace my_parser
 {
 namespace json = boost::json;
 
+class Buffer
+{
+protected:
+    void clearBuffer()
+    {
+        if (m_buffer != nullptr)
+        {
+            delete[](m_buffer);
+            m_buffer = nullptr;
+            m_length = 0;
+        }
+    }
+    char* m_buffer{nullptr};
+    size_t m_length{};
+public:
+    Buffer(size_t length)
+    {
+        if (m_buffer != nullptr) clearBuffer();
+        m_buffer = new char[length];
+        m_length = length;
+    }
+    ~Buffer()
+    {
+        clearBuffer();
+    }
+    char* getBuffer() const
+    {
+        return m_buffer;
+    }
+    size_t getLength() const
+    {
+        return m_length;
+    }
+};
+
 json::value
-parse_file( char const* filename )
+ParseFile( char const* filename )
 {
     std::ifstream inputFile(filename, std::ifstream::binary);
     if (inputFile)
@@ -20,121 +55,38 @@ parse_file( char const* filename )
         const size_t length = inputFile.tellg();
         inputFile.seekg(0, inputFile.beg);
 
-        char * buffer = new char[length];
-        inputFile.read(buffer, length);
-        if (!inputFile)
-        {
-            delete[](buffer);
-            return{};
-        }
+        Buffer buffer(length);
+        inputFile.read(buffer.getBuffer(), buffer.getLength());
+        if (!inputFile) return{};
 
         json::error_code err;
         json::stream_parser parser;
-        parser.write(buffer, length, err);
-        if (err)
-        {
-            delete[](buffer);
-            return{};
-        }
+        parser.write(buffer.getBuffer(), buffer.getLength(), err);
+        if (err) return{};
 
         parser.finish(err);
-        if (err)
-        {
-            delete[](buffer);
-            return{};
-        }
+        if (err) return{};
 
-        delete[](buffer);
         return parser.release();
     }
     return{};
 }
 
-void
-pretty_print( std::ostream& os, json::value const& jv, std::string* indent = nullptr )
+my::ColoredGraph
+ReadColoredGraph(json::value const& jv)
 {
-    std::string indent_;
-    if(! indent)
-        indent = &indent_;
-    switch(jv.kind())
+    my::ColoredGraph G;
+    if (jv.kind() != json::kind::object) return G;
+    
+    auto const& obj = jv.get_object();
+    if(!obj.empty())
     {
-    case json::kind::object:
-    {
-        os << "{\n";
-        indent->append(4, ' ');
-        auto const& obj = jv.get_object();
-        if(! obj.empty())
+        auto it = obj.begin();
+        for(;it != obj.end();++it)
         {
-            auto it = obj.begin();
-            for(;;)
-            {
-                os << *indent << json::serialize(it->key()) << " : ";
-                pretty_print(os, it->value(), indent);
-                if(++it == obj.end())
-                    break;
-                os << ",\n";
-            }
+            
         }
-        os << "\n";
-        indent->resize(indent->size() - 4);
-        os << *indent << "}";
-        break;
     }
-
-    case json::kind::array:
-    {
-        os << "[\n";
-        indent->append(4, ' ');
-        auto const& arr = jv.get_array();
-        if(! arr.empty())
-        {
-            auto it = arr.begin();
-            for(;;)
-            {
-                os << *indent;
-                pretty_print( os, *it, indent);
-                if(++it == arr.end())
-                    break;
-                os << ",\n";
-            }
-        }
-        os << "\n";
-        indent->resize(indent->size() - 4);
-        os << *indent << "]";
-        break;
-    }
-
-    case json::kind::string:
-    {
-        os << json::serialize(jv.get_string());
-        break;
-    }
-
-    case json::kind::uint64:
-        os << jv.get_uint64();
-        break;
-
-    case json::kind::int64:
-        os << jv.get_int64();
-        break;
-
-    case json::kind::double_:
-        os << jv.get_double();
-        break;
-
-    case json::kind::bool_:
-        if(jv.get_bool())
-            os << "true";
-        else
-            os << "false";
-        break;
-
-    case json::kind::null:
-        os << "null";
-        break;
-    }
-
-    if(indent->empty())
-        os << "\n";
+    return G;
 }
 }
