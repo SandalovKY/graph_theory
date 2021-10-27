@@ -16,10 +16,12 @@ int main(int argc, char ** argv) {
     }
 
     my::ColoredGraph resGraph;
+    my::BitAdjacencyMatrix resAdjMatr;
     try
     {
         auto const jv = my_parser::ParseFile( argv[1] );
-        resGraph = my_parser::ReadColoredGraph(jv);
+        resGraph = my_parser::ReadColoredGraphToAdjList(jv);
+        resAdjMatr = my_parser::ReadColoredGraphToAdjMatr(jv);
     }
     catch(std::exception const& e)
     {
@@ -60,6 +62,13 @@ int main(int argc, char ** argv) {
     {
         std::cout << boost::get(mapForNames, *vi) << '\n';
         std::cout << boost::get(mapForColors, *vi) << '\n';
+    }
+    std::cout << "AdjBitMatr:\n";
+    auto size = resAdjMatr.getMatrDimSize();
+    std::cout << size << '\n';
+    for (int i = 0; i < size; ++i)
+    {
+        std::cout << resAdjMatr[i] << '\n';
     }
     
     return EXIT_SUCCESS;

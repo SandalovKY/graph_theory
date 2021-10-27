@@ -77,7 +77,7 @@ ParseFile( char const* filename )
 }
 
 my::ColoredGraph
-ReadColoredGraph(json::value const& jv)
+ReadColoredGraphToAdjList(json::value const& jv)
 {
     if (jv.kind() != json::kind::object) return my::ColoredGraph();
     
@@ -95,7 +95,6 @@ ReadColoredGraph(json::value const& jv)
         {
             std::vector<std::pair<size_t, size_t> > pairList;
             size_t vertNum = 0;
-
             for ( auto const& vertIt : vertObj )
             {
                 size_t vertex = std::stoi(std::string(vertIt.key()));
@@ -106,14 +105,49 @@ ReadColoredGraph(json::value const& jv)
                 {
                     if (arrVertIt.kind() != json::kind::int64) return my::ColoredGraph();
                     pairList.emplace_back(vertex, arrVertIt.get_int64());
-                    std::cout << vertex << '\t' << arrVertIt.get_int64() << std::endl;
                 }
             }
-
             return my::ColoredGraph(pairList.begin(), pairList.end(),
                                 vertNum);
         }
     }
     return my::ColoredGraph();
+}
+
+my::BitAdjacencyMatrix::m_matrix_type
+ReadColoredGraphToAdjMatr(json::value const& jv)
+{
+    if (jv.kind() != json::kind::object) return my::BitAdjacencyMatrix::m_matrix_type();
+    auto const& obj = jv.get_object();
+    if(!obj.empty())
+    {
+        auto it = obj.begin();
+        auto const name = it->key();
+        if (name != "Name") return my::BitAdjacencyMatrix::m_matrix_type();
+        ++it;
+        if (it->key() != "Vertices" ||
+            it->value().kind() != json::kind::object) return my::BitAdjacencyMatrix::m_matrix_type();
+        auto const& vertObj = it->value().get_object();
+        if (!vertObj.empty())
+        {
+            my::BitAdjacencyMatrix::m_matrix_type adjMatr{};
+            for ( auto const& vertIt : vertObj )
+            {
+                size_t vertex = std::stoi(std::string(vertIt.key()));
+                if (vertIt.value().kind() != json::kind::array) return my::BitAdjacencyMatrix::m_matrix_type();
+                auto const& arrVert = vertIt.value().get_array();
+                my::BitAdjacencyMatrix::m_vertex_num_type nbhdVert = vertObj.size();
+                my::BitAdjacencyMatrix::m_string_type bitStr(nbhdVert);
+                for (auto const& arrVertIt : arrVert)
+                {
+                    if (arrVertIt.kind() != json::kind::int64) return my::BitAdjacencyMatrix::m_matrix_type();
+                    bitStr.set(arrVertIt.get_int64());
+                }
+                adjMatr.push_back(bitStr);
+            }
+            return adjMatr;
+        }
+    }
+    return my::BitAdjacencyMatrix::m_matrix_type();
 }
 }
