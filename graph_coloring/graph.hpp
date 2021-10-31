@@ -32,11 +32,15 @@ public:
             vertex = boost::dynamic_bitset<>(vertex_num);
         }
     }
-    BitAdjacencyMatrix(const m_matrix_type & other_martix)
+    BitAdjacencyMatrix(m_matrix_type&& other_martix)
     : m_matrix(std::move(other_martix)),
-      m_vertex_num(m_matrix.size())
+      m_vertex_num(static_cast<m_vertex_num_type>(m_matrix.size()))
     {}
-    void operator=(m_matrix_type && other_martix)
+    BitAdjacencyMatrix(const m_matrix_type& other_matrix)
+    : m_matrix(other_matrix),
+      m_vertex_num(static_cast<m_vertex_num_type>(m_matrix.size()))
+    {}
+    void operator=(m_matrix_type&& other_martix)
     {
         m_matrix = std::move(other_martix);
         m_vertex_num = m_matrix.size();

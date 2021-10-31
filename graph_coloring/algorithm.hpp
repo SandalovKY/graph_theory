@@ -1,8 +1,17 @@
 #pragma once
-#include <boost/graph/adjacency_list.hpp>
+#include "graph.hpp"
 
-template<typename >
-uint16_t coloringAlgorithm()
+template<typename Graph>
+struct Algorithm;
+
+template<>
+struct Algorithm<my::BitAdjacencyMatrix>
 {
+    static std::vector<std::vector<uint16_t> > coloring(const my::BitAdjacencyMatrix& adjMatr)
+    {
+        std::vector<std::vector<uint16_t>> resColors{};
+        resColors.emplace_back(std::vector<uint16_t>{1, 1, 1, 1});
 
-}
+        return resColors;
+    }
+};

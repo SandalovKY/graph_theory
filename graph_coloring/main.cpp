@@ -1,10 +1,10 @@
+#include "graph.hpp"
 #include "algorithm.hpp"
 #include "parse_input_json.hpp"
 #include <iostream>
 #include <map>
 #include <utility>
 #include <tuple>
-#include "graph.hpp"
 
 int main(int argc, char ** argv) {
     if(argc != 2)
@@ -22,6 +22,15 @@ int main(int argc, char ** argv) {
         auto const jv = my_parser::ParseFile( argv[1] );
         resGraph = my_parser::ReadColoredGraphToAdjList(jv);
         resAdjMatr = my_parser::ReadColoredGraphToAdjMatr(jv);
+        const auto resColors = Algorithm<my::BitAdjacencyMatrix>::coloring(resAdjMatr);
+        for (const auto& el : resColors)
+        {
+            for (const auto& vert : el)
+            {
+                std::cout << vert << '\t';
+            }
+            std::cout << '\n';
+        }
     }
     catch(std::exception const& e)
     {
