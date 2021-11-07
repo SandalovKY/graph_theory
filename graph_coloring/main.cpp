@@ -1,6 +1,7 @@
 #include "graph.hpp"
 #include "algorithm.hpp"
 #include "parse_input_json.hpp"
+#include "bitset.h"
 #include <iostream>
 #include <map>
 #include <utility>
@@ -16,13 +17,15 @@ int main(int argc, char ** argv) {
     }
 
     my::ColoredGraph resGraph;
-    my::BitAdjacencyMatrix resAdjMatr;
+    using bitset_type = myDynamicBitset<>;
+    using adjMatr_type = my::BitAdjacencyMatrix<bitset_type>; 
+    adjMatr_type resAdjMatr;
     try
     {
-        auto const jv = my_parser::ParseFile( argv[1] );
+        auto const jv = my_parser::ParseFile(argv[1]);
         resGraph = my_parser::ReadColoredGraphToAdjList(jv);
-        resAdjMatr = my_parser::ReadColoredGraphToAdjMatr(jv);
-        const auto resColors = Algorithm<my::BitAdjacencyMatrix>::coloring(resAdjMatr);
+        resAdjMatr = my_parser::ReadColoredGraphToAdjMatr<bitset_type>(jv);
+        const auto resColors = Algorithm<adjMatr_type>::coloring(resAdjMatr);
         for (const auto& el : resColors)
         {
             for (const auto& vert : el)
@@ -67,11 +70,11 @@ int main(int argc, char ** argv) {
         boost::put(mapForColors, descr, color++);
     }
     std::tie(vi, vi_end) = boost::vertices(resGraph);
-    for (;vi != vi_end; ++vi)
-    {
-        std::cout << boost::get(mapForNames, *vi) << '\n';
-        std::cout << boost::get(mapForColors, *vi) << '\n';
-    }
+    // for (;vi != vi_end; ++vi)
+    // {
+    //     std::cout << boost::get(mapForNames, *vi) << '\n';
+    //     std::cout << boost::get(mapForColors, *vi) << '\n';
+    // }
     std::cout << "AdjBitMatr:\n";
     auto size = resAdjMatr.getMatrDimSize();
     std::cout << size << '\n';

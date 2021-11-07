@@ -12,11 +12,12 @@ using ColoredGraph = boost::adjacency_list<boost::listS, boost::listS, boost::un
                                                    std::string, Vertex_color_p>, boost::no_property>;
 
 
+template <typename NeighboursList>
 class BitAdjacencyMatrix
 {
 public:
-    using m_matrix_type = std::vector<boost::dynamic_bitset<> >;
-    using m_string_type = boost::dynamic_bitset<>;
+    using m_matrix_type = std::vector<NeighboursList>;
+    using m_string_type = NeighboursList;
     using m_vertex_num_type = size_t;
     using m_edges_num_type = size_t;
 private:
@@ -24,12 +25,23 @@ private:
     m_vertex_num_type m_vertex_num{};
     // m_edges_num_type m_edges_num;
 public:
+    m_matrix_type& getMatrix()
+    {
+        return m_matrix;
+    }
+
+    NeighboursList& getMatrix(size_t ind)
+    {
+        if (ind < 0 || ind >= getMatrDimSize()) throw std::out_of_range("Incorrect index");
+        return m_matrix[ind];
+    }
+
     BitAdjacencyMatrix(m_vertex_num_type vertex_num)
     : m_matrix(vertex_num), m_vertex_num(vertex_num)
     {
         for (auto & vertex : m_matrix)
         {
-            vertex = boost::dynamic_bitset<>(vertex_num);
+            vertex = NeighboursList(vertex_num);
         }
     }
     BitAdjacencyMatrix(m_matrix_type&& other_martix)
@@ -47,7 +59,7 @@ public:
     }
     BitAdjacencyMatrix()
     {}
-    boost::dynamic_bitset<>& operator[](size_t elem)
+    NeighboursList& operator[](size_t elem)
     {
         return m_matrix[elem];
     }

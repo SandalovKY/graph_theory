@@ -114,40 +114,41 @@ ReadColoredGraphToAdjList(json::value const& jv)
     return my::ColoredGraph();
 }
 
-my::BitAdjacencyMatrix::m_matrix_type
+template <typename ListType>
+typename my::BitAdjacencyMatrix<ListType>::m_matrix_type
 ReadColoredGraphToAdjMatr(json::value const& jv)
 {
-    if (jv.kind() != json::kind::object) return my::BitAdjacencyMatrix::m_matrix_type();
+    if (jv.kind() != json::kind::object) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
     auto const& obj = jv.get_object();
     if(!obj.empty())
     {
         auto it = obj.begin();
         auto const name = it->key();
-        if (name != "Name") return my::BitAdjacencyMatrix::m_matrix_type();
+        if (name != "Name") return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
         ++it;
         if (it->key() != "Vertices" ||
-            it->value().kind() != json::kind::object) return my::BitAdjacencyMatrix::m_matrix_type();
+            it->value().kind() != json::kind::object) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
         auto const& vertObj = it->value().get_object();
         if (!vertObj.empty())
         {
-            my::BitAdjacencyMatrix::m_matrix_type adjMatr{};
+            typename my::BitAdjacencyMatrix<ListType>::m_matrix_type adjMatr{};
             for ( auto const& vertIt : vertObj )
             {
                 size_t vertex = std::stoi(std::string(vertIt.key()));
-                if (vertIt.value().kind() != json::kind::array) return my::BitAdjacencyMatrix::m_matrix_type();
+                if (vertIt.value().kind() != json::kind::array) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
                 auto const& arrVert = vertIt.value().get_array();
-                my::BitAdjacencyMatrix::m_vertex_num_type nbhdVert = vertObj.size();
-                my::BitAdjacencyMatrix::m_string_type bitStr(nbhdVert);
+                typename my::BitAdjacencyMatrix<ListType>::m_vertex_num_type nbhdVert = vertObj.size();
+                typename my::BitAdjacencyMatrix<ListType>::m_string_type bitStr(nbhdVert);
                 for (auto const& arrVertIt : arrVert)
                 {
-                    if (arrVertIt.kind() != json::kind::int64) return my::BitAdjacencyMatrix::m_matrix_type();
+                    if (arrVertIt.kind() != json::kind::int64) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
                     bitStr.set(arrVertIt.get_int64());
                 }
-                adjMatr.push_back(bitStr);
+                adjMatr.emplace_back(std::move(bitStr));
             }
             return adjMatr;
         }
     }
-    return my::BitAdjacencyMatrix::m_matrix_type();
+    return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
 }
 }
