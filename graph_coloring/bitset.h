@@ -119,10 +119,12 @@ public:
     {
         if (m_set_bit_num < bitPos) return false;
         const m_bit_position_type block_num = bitPos / m_block_size;
+        // std::cout << "Block num: " << block_num << std::endl;
         const m_block_size_type block_offset = bitPos % m_block_size;
+        // std::cout << "Block offset: " << block_offset << std::endl;
 
         if (block_num > m_block_vector.size()) return false;
-        m_block_vector[block_num] &= ~(1 << block_offset);
+        m_block_vector[block_num] &= ~(m_block_type{ 1 } << block_offset);
         return true;
     }
 
@@ -157,10 +159,11 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator&(myDynamicBitset lhs, const myDynamicBitset& rhs)
+    friend myDynamicBitset operator&(const myDynamicBitset lhs, const myDynamicBitset& rhs)
     {
-        lhs &= rhs;
-        return lhs;
+        myDynamicBitset tmp{ lhs };
+        tmp &= rhs;
+        return tmp;
     }
 
     myDynamicBitset& operator|=(const myDynamicBitset& other)
@@ -175,8 +178,9 @@ public:
 
     friend myDynamicBitset operator|(myDynamicBitset lhs, const myDynamicBitset& rhs)
     {
-        lhs |= rhs;
-        return lhs;
+        myDynamicBitset tmp{ lhs };
+        tmp |= rhs;
+        return tmp;
     }
 
     myDynamicBitset& operator^=(const myDynamicBitset& other)
@@ -191,8 +195,9 @@ public:
 
     friend myDynamicBitset operator^(myDynamicBitset lhs, const myDynamicBitset& rhs)
     {
-        lhs ^= rhs;
-        return lhs;
+        myDynamicBitset tmp{ lhs };
+        tmp ^= rhs;
+        return tmp;
     }
 
     myDynamicBitset& operator~()
