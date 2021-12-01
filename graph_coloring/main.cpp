@@ -21,6 +21,7 @@ int main(int argc, char ** argv) {
     using adjMatr_type = my::BitAdjacencyMatrix<bitset_type>; 
     adjMatr_type resAdjMatr;
     adjMatr_type otherAdjMatr;
+    adjMatr_type myTestMatr;
     try
     {
         auto const jv = my_parser::ParseFile(argv[1]);
@@ -28,16 +29,29 @@ int main(int argc, char ** argv) {
         resAdjMatr = my_parser::ReadColoredGraphToAdjMatr<bitset_type>(jv);
         std::cout << "Start to input col graph file\n";
         otherAdjMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../dsjc500.1.col");
+        myTestMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../matr.col");
+        std::cout << "Finished files reading\n";
         const auto resColors = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
-        std::cout << "Res colors: " << resColors.size() << '\n';
-        for (const auto& el : resColors)
+        const auto cliques = Algorithm<adjMatr_type>::coloring1(otherAdjMatr);
+        std::cout << "Num cliques: " << cliques.size() << '\n';
+        for (const auto& el : cliques)
         {
             for (const auto& vert : el)
             {
-                std::cout << vert << '\t';
+                std::cout << vert + 1 << '\t';
             }
             std::cout << '\n';
         }
+        std::cout << "Num cliques: " << cliques.size() << '\n';
+        // std::cout << "Res colors: " << resColors.size() << '\n';
+        // for (const auto& el : resColors)
+        // {
+        //     for (const auto& vert : el)
+        //     {
+        //         std::cout << vert << '\t';
+        //     }
+        //     std::cout << '\n';
+        // }
     }
     catch(std::exception const& e)
     {

@@ -2,6 +2,7 @@
 #include "graph.hpp"
 #include "ant_colony.hpp"
 #include <iostream>
+// #include <stack>
 
 template<typename Graph>
 struct Algorithm;
@@ -60,16 +61,52 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList> >
         return resColors;
     }
 
-    static std::vector<std::vector<uint16_t> > coloring1(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
+    static std::vector<std::set<size_t>> coloring1(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
-        std::vector<std::vector<uint16_t>> cliques{};
-        size_t numCliques{ 0 };
+        std::vector<std::set<size_t>> possibleCliques{};
         size_t dimSize = adjMatr.getMatrDimSize();
-        // std::cout << "Dim size: " << dimSize << std::endl;
         std::vector<bool> isVertVisited(dimSize, false);
+
+        for (size_t ind = 0; ind < dimSize; ++ind)
+        {
+            adjMatr[ind].unset(ind);
+        }
+
+        // std::cout << "Algorithm started\n";
+
         for(size_t ind = 0; ind < dimSize; ++ind)
         {
-
+            std::cout << "Index: " << ind << std::endl;
+            if (isVertVisited[ind]) continue;
+            std::vector<bool> isVertVisitedLocally(dimSize, false);
+            isVertVisited[ind] = true;
+            auto bitset = adjMatr.getLine(ind);
+            size_t adjVert = bitset.getFirstNonZeroPosition();
+            while (adjVert != dimSize)
+            {
+                // std::cout << "AdjVert: " << adjVert << std::endl;
+                if (!isVertVisitedLocally[adjVert])
+                {
+                    size_t localAdjVert = adjVert;
+                    auto localBitset = adjMatr[ind];
+                    std::set<size_t> cliqueSet{ ind };
+                    while (localAdjVert != dimSize)
+                    {
+                        // std::cout << "LocalAdjVert: " << localAdjVert << std::endl;
+                        // std::cout << "LocalBitset: " << localBitset << std::endl;
+                        isVertVisited[localAdjVert] = true;
+                        isVertVisitedLocally[localAdjVert] = true;
+                        cliqueSet.insert(localAdjVert);
+                        auto& adjVertBitset = adjMatr.getLine(localAdjVert);
+                        localBitset &= adjVertBitset;
+                        localAdjVert = localBitset.getFirstNonZeroPosition();
+                    }
+                    if (cliqueSet.size() > 2) possibleCliques.emplace_back(std::move(cliqueSet));
+                }
+                bitset.unset(adjVert);
+                adjVert = bitset.getFirstNonZeroPosition();
+            }
         }
+        return possibleCliques;
     }
 };

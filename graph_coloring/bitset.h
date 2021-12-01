@@ -134,7 +134,7 @@ public:
         m_bit_position_type i = std::distance(m_block_vector.begin(), std::find_if(m_block_vector.begin(), m_block_vector.end(), m_block_not_empty));
         if (i >= num_blocks())
         {
-            return npos;
+            return m_set_bit_num + 1;
         }
         return i * m_block_size + static_cast<m_block_size_type>(getLowestBit(m_block_vector[i]));
     }

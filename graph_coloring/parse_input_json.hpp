@@ -128,7 +128,7 @@ ReadGraphToAdjMatr(char const* filename)
     std::ifstream inputFile(filename);
     if (inputFile.is_open())
     {
-        // std::cout << "Opened file\n";
+        std::cout << "Opened file\n";
         size_t fileSize{ 0 };
         std::string line;
         std::getline(inputFile, line);
