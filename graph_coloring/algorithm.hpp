@@ -61,52 +61,50 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList> >
         return resColors;
     }
 
-    static std::vector<std::set<size_t>> coloring1(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
+    static std::vector<std::set<size_t>> maxCliqueFinding(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
-        std::vector<std::set<size_t>> possibleCliques{};
+        std::vector<std::set<size_t>> allMaxCliques{};
         size_t dimSize = adjMatr.getMatrDimSize();
-        std::vector<bool> isVertVisited(dimSize, false);
 
         for (size_t ind = 0; ind < dimSize; ++ind)
         {
             adjMatr[ind].unset(ind);
         }
 
-        // std::cout << "Algorithm started\n";
-
         for(size_t ind = 0; ind < dimSize; ++ind)
         {
-            std::cout << "Index: " << ind << std::endl;
-            if (isVertVisited[ind]) continue;
-            std::vector<bool> isVertVisitedLocally(dimSize, false);
-            isVertVisited[ind] = true;
-            auto bitset = adjMatr.getLine(ind);
-            size_t adjVert = bitset.getFirstNonZeroPosition();
-            while (adjVert != dimSize)
+            // Пул вершин, из которых набираем максимальную клику
+            auto pathBitset = adjMatr.getLine(ind);
+            auto curBitset = pathBitset;
+            std::set<size_t> cliqueSet{ ind };
+
+            // Проверка на то, есть ли у нашей вершины вообще соседи
+            size_t adjVert = pathBitset.getFirstNonZeroPosition();
+
+            while (adjVert < dimSize)
             {
-                // std::cout << "AdjVert: " << adjVert << std::endl;
-                if (!isVertVisitedLocally[adjVert])
+                size_t nextVert{ adjVert };
+                curBitset.unset(adjVert);
+                size_t numNbr{ countSetBits(adjMatr.getLine(adjVert) & pathBitset) };
+                size_t otherVert{ static_cast<size_t>(curBitset.getFirstNonZeroPosition()) };
+                while (otherVert < dimSize)
                 {
-                    size_t localAdjVert = adjVert;
-                    auto localBitset = adjMatr[ind];
-                    std::set<size_t> cliqueSet{ ind };
-                    while (localAdjVert != dimSize)
+                    size_t numNbrForOtherVert = countSetBits(adjMatr.getLine(otherVert) & pathBitset);
+                    if (numNbrForOtherVert > numNbr)
                     {
-                        // std::cout << "LocalAdjVert: " << localAdjVert << std::endl;
-                        // std::cout << "LocalBitset: " << localBitset << std::endl;
-                        isVertVisited[localAdjVert] = true;
-                        isVertVisitedLocally[localAdjVert] = true;
-                        cliqueSet.insert(localAdjVert);
-                        auto& adjVertBitset = adjMatr.getLine(localAdjVert);
-                        localBitset &= adjVertBitset;
-                        localAdjVert = localBitset.getFirstNonZeroPosition();
+                        numNbr = numNbrForOtherVert;
+                        nextVert = otherVert;
                     }
-                    if (cliqueSet.size() > 2) possibleCliques.emplace_back(std::move(cliqueSet));
+                    curBitset.unset(otherVert);
+                    otherVert = curBitset.getFirstNonZeroPosition();
                 }
-                bitset.unset(adjVert);
-                adjVert = bitset.getFirstNonZeroPosition();
+                cliqueSet.insert(nextVert);
+                pathBitset &= adjMatr.getLine(nextVert);
+                adjVert = pathBitset.getFirstNonZeroPosition();
+                curBitset = pathBitset;
             }
+            if (cliqueSet.size() > 2) allMaxCliques.emplace_back(std::move(cliqueSet));
         }
-        return possibleCliques;
+        return allMaxCliques;
     }
 };

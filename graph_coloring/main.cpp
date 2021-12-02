@@ -6,6 +6,8 @@
 #include <map>
 #include <utility>
 #include <tuple>
+#include <chrono>
+#include <fstream>
 
 int main(int argc, char ** argv) {
     if(argc != 2)
@@ -31,18 +33,38 @@ int main(int argc, char ** argv) {
         otherAdjMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../dsjc500.1.col");
         myTestMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../matr.col");
         std::cout << "Finished files reading\n";
-        const auto resColors = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
-        const auto cliques = Algorithm<adjMatr_type>::coloring1(otherAdjMatr);
-        std::cout << "Num cliques: " << cliques.size() << '\n';
+        //const auto resColors = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
+        auto start = std::chrono::high_resolution_clock::now();
+        const auto cliques = Algorithm<adjMatr_type>::maxCliqueFinding(otherAdjMatr);
+        auto end = std::chrono::high_resolution_clock::now();
+        size_t maxClique{ 0 };
+        std::ofstream myFile;
+        myFile.open("Results.txt");
         for (const auto& el : cliques)
         {
+            if (el.size() > maxClique) maxClique = el.size();
             for (const auto& vert : el)
             {
-                std::cout << vert + 1 << '\t';
+                myFile << vert + 1 << '\t';
             }
-            std::cout << '\n';
+            myFile << '\n';
         }
-        std::cout << "Num cliques: " << cliques.size() << '\n';
+        // for (const auto& el : cliques)
+        // {
+        //     if (el.size() == maxClique)
+        //     {
+        //         for (const auto& vert : el)
+        //         {
+        //             std::cout << vert + 1 << '\t';
+        //         }
+        //         std::cout << '\n';
+        //     }
+        // }
+        myFile << "Num cliques: " << cliques.size() << '\n';
+        std::cout << "Max clique size: " << maxClique << '\n';
+        double time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        std::cout << "Measured time: " << time << "in microseconds\n";
+        myFile.close();
         // std::cout << "Res colors: " << resColors.size() << '\n';
         // for (const auto& el : resColors)
         // {

@@ -19,7 +19,7 @@ public:
     using m_block_const_iterator_type = typename std::vector<m_block_type>::const_iterator;
 private:
     m_bit_position_type m_block_num{};
-    m_bit_position_type m_set_bit_num{}; 
+    m_bit_position_type m_last_set_bit_num{}; 
     m_block_size_type m_block_size{};
     std::vector<m_block_type> m_block_vector{};
 
@@ -37,14 +37,14 @@ public:
     // default constructor
     myDynamicBitset()
         : m_block_size(sizeof(m_block_type) * 8),
-          m_set_bit_num(0),
+          m_last_set_bit_num(-1),
           m_block_num(0),
           m_block_vector(min_num_blocks, 0)
     {}
 
     myDynamicBitset(m_bit_position_type numBits)
         : m_block_size(sizeof(m_block_type) * 8),
-          m_set_bit_num(numBits - 1),
+          m_last_set_bit_num(numBits - 1),
           m_block_num(numBits / (sizeof(m_block_type) * 8) + 1),
           m_block_vector(m_block_num)
     {}
@@ -52,10 +52,11 @@ public:
     // move constructor
     myDynamicBitset(myDynamicBitset&& other)
         : m_block_vector(std::move(other.m_block_vector)),
-          m_set_bit_num(other.m_set_bit_num),
+          m_last_set_bit_num(other.m_last_set_bit_num),
           m_block_num(other.m_block_num),
           m_block_size(other.m_block_size)
     {
+        other.m_last_set_bit_num = -1;
         other.m_block_num = 0;
         other.m_block_size = 0;
     }
@@ -63,7 +64,7 @@ public:
     // copy constructor
     myDynamicBitset(const myDynamicBitset& other)
         : m_block_vector(other.m_block_vector),
-          m_set_bit_num(other.m_set_bit_num),
+          m_last_set_bit_num(other.m_last_set_bit_num),
           m_block_num(other.m_block_num),
           m_block_size(other.m_block_size)
     {}
@@ -73,11 +74,11 @@ public:
     {
         m_block_vector = std::move(other.m_block_vector);
 
-        m_set_bit_num = other.m_set_bit_num;
+        m_last_set_bit_num = other.m_last_set_bit_num;
         m_block_num = other.m_block_num;
         m_block_size = other.m_block_size;
 
-        other.m_set_bit_num = 0;
+        other.m_last_set_bit_num = -1;
         other.m_block_num = 0;
         other.m_block_size = 0;
     }
@@ -87,7 +88,7 @@ public:
     {
         m_block_vector = other.m_block_vector;
 
-        m_set_bit_num = other.m_set_bit_num;
+        m_last_set_bit_num = other.m_last_set_bit_num;
         m_block_num = other.m_block_num;
         m_block_size = other.m_block_size;
     }
@@ -101,7 +102,7 @@ public:
     // setting definite bit 
     bool set(m_bit_position_type bitPos)
     {
-        if (m_set_bit_num < bitPos) m_set_bit_num = bitPos;
+        if (m_last_set_bit_num < bitPos) m_last_set_bit_num = bitPos;
         const m_bit_position_type block_num = bitPos / m_block_size + 1;
         const m_block_size_type block_offset = bitPos % m_block_size;
 
@@ -117,24 +118,33 @@ public:
 
     bool unset(m_bit_position_type bitPos)
     {
-        if (m_set_bit_num < bitPos) return false;
+        if (m_last_set_bit_num < bitPos) return false;
         const m_bit_position_type block_num = bitPos / m_block_size;
         // std::cout << "Block num: " << block_num << std::endl;
         const m_block_size_type block_offset = bitPos % m_block_size;
         // std::cout << "Block offset: " << block_offset << std::endl;
 
-        if (block_num > m_block_vector.size()) return false;
+        if (block_num >= m_block_vector.size()) return false;
         m_block_vector[block_num] &= ~(m_block_type{ 1 } << block_offset);
         return true;
     }
-
+    
+    friend size_t countSetBits(const myDynamicBitset& bitset)
+    {
+        size_t count{ 0 };
+        for (const auto& block : bitset.m_block_vector)
+        {
+            count += __builtin_popcount(block);
+        }
+        return count;
+    }
 
     m_bit_position_type getFirstNonZeroPosition() const
     {
         m_bit_position_type i = std::distance(m_block_vector.begin(), std::find_if(m_block_vector.begin(), m_block_vector.end(), m_block_not_empty));
         if (i >= num_blocks())
         {
-            return m_set_bit_num + 1;
+            return m_last_set_bit_num + 1;
         }
         return i * m_block_size + static_cast<m_block_size_type>(getLowestBit(m_block_vector[i]));
     }
@@ -217,7 +227,7 @@ public:
         myDynamicBitset::m_block_type tmpBlockPos{0};
         for (size_t block = 0; block < data.m_block_num; ++block)
         {
-            if (data.m_set_bit_num / ((block + 1) * data.m_block_size) > 0)
+            if (data.m_last_set_bit_num / ((block + 1) * data.m_block_size) > 0)
             {
                 while (tmpBlockPos < data.m_block_size)
                 {
@@ -227,7 +237,7 @@ public:
             }
             else
             {
-                size_t lastBits = data.m_set_bit_num % ((block + 1) * data.m_block_size);
+                size_t lastBits = data.m_last_set_bit_num % ((block + 1) * data.m_block_size);
                 while (tmpBlockPos <= lastBits)
                 {
                     os << ((data.m_block_vector[block] & (static_cast<myDynamicBitset::m_block_type>(1) << tmpBlockPos)) >> tmpBlockPos++) << ' ';
