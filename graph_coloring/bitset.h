@@ -93,6 +93,17 @@ public:
         m_block_size = other.m_block_size;
     }
 
+    friend bool operator==(const myDynamicBitset& l, const myDynamicBitset& r)
+    {
+        if (l.m_last_set_bit_num != r.m_last_set_bit_num ||
+            l.m_block_num != r.m_block_num) return false;
+        for (size_t ind = 0; ind < l.m_block_num; ++ind)
+        {
+            if (l.m_block_vector[ind] != r.m_block_vector[ind]) return false;
+        }
+        return true;
+    }
+
     // getting number of filled blocks
     m_bit_position_type num_blocks() const
     {
@@ -127,6 +138,20 @@ public:
         if (block_num >= m_block_vector.size()) return false;
         m_block_vector[block_num] &= ~(m_block_type{ 1 } << block_offset);
         return true;
+    }
+
+    std::set<size_t> getNeighbours()
+    {
+        std::set<size_t> ret;
+        myDynamicBitset tmp = *this;
+        size_t adjVert = tmp.getFirstNonZeroPosition();
+        while(adjVert <= tmp.m_last_set_bit_num)
+        {
+            ret.insert(adjVert);
+            tmp.unset(adjVert);
+            adjVert = tmp.getFirstNonZeroPosition();
+        }
+        return ret;
     }
     
     friend size_t countSetBits(const myDynamicBitset& bitset)
@@ -195,7 +220,7 @@ public:
 
     myDynamicBitset& operator^=(const myDynamicBitset& other)
     {
-        if (this->m_block_num != other.block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
+        if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
         for(size_t block = 0; block < this->m_block_num; ++block)
         {
             this->m_block_vector[block] ^= other.m_block_vector[block];

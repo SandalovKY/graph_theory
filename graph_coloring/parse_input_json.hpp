@@ -166,6 +166,48 @@ ReadGraphToAdjMatr(char const* filename)
     return my::BitAdjacencyMatrix<ListType>{};
 }
 
+std::vector<std::vector<size_t>> ReadGraphToVector(char const* filename)
+{
+    // std::cout << "Inside function\n";
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        std::cout << "Opened file\n";
+        size_t fileSize{ 0 };
+        std::string line;
+        std::getline(inputFile, line);
+        std::vector<std::string> parsedLine;
+        boost::split(parsedLine, line, [](char c){ return c == ' '; });
+
+        while (parsedLine[0] != "p")
+        {
+            std::getline(inputFile, line);
+            boost::split(parsedLine, line, [](char c){ return c == ' '; });
+        }
+
+        if (parsedLine.size() < 4) return {};
+        std::vector<std::vector<size_t>> retVector(std::stoi(parsedLine[3]), {0, 0});
+
+        // std::cout << adjMatrRet.getMatrDimSize() << std::endl;
+
+        std::getline(inputFile, line);
+        boost::split(parsedLine, line, [](char c){ return c == ' '; });
+
+        while (parsedLine[0] == "e")
+        {
+            size_t v_first{ static_cast<size_t>(std::stoi(parsedLine[1])) };
+            size_t v_second{ static_cast<size_t>(std::stoi(parsedLine[2])) };
+            retVector.push_back({ v_first, v_second });
+            std::getline(inputFile, line);
+            boost::split(parsedLine, line, [](char c){ return c == ' '; });
+        }
+
+        return retVector;
+    }
+    std::cout << "Error while file reading" << std::endl;
+    return {};
+}
+
 template <typename ListType>
 typename my::BitAdjacencyMatrix<ListType>::m_matrix_type
 ReadColoredGraphToAdjMatr(json::value const& jv)

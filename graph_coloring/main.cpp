@@ -9,6 +9,56 @@
 #include <chrono>
 #include <fstream>
 
+const int MAX = 500;
+ 
+// Stores the vertices
+int store[MAX], n;
+ 
+// Graph
+int graph[MAX][MAX];
+ 
+// Degree of the vertices
+int d[MAX];
+
+bool is_clique(int b)
+{
+ 
+    // Run a loop for all set of edges
+    for (int i = 1; i < b; i++) {
+        for (int j = i + 1; j < b; j++)
+ 
+            // If any edge is missing
+            if (graph[store[i]][store[j]] == 0)
+                return false;
+    }
+    return true;
+}
+
+int maxCliques(int i, int l)
+{
+    // Maximal clique size
+    int max_ = 0;
+ 
+    // Check if any vertices from i+1
+    // can be inserted
+    for (int j = i + 1; j <= n; j++) {
+ 
+        // Add the vertex to store
+        store[l] = j;
+ 
+        // If the graph is not a clique of size k then
+        // it cannot be a clique by adding another edge
+        if (is_clique(l + 1)) {
+ 
+            // Update max
+            max_ = std::max(max_, l);
+ 
+            // Check if another edge can be added
+            max_ = std::max(max_, maxCliques(j, l + 1));
+        }
+    }
+    return max_;
+}
 int main(int argc, char ** argv) {
     if(argc != 2)
     {
@@ -31,8 +81,18 @@ int main(int argc, char ** argv) {
         resAdjMatr = my_parser::ReadColoredGraphToAdjMatr<bitset_type>(jv);
         std::cout << "Start to input col graph file\n";
         otherAdjMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../dsjc500.1.col");
+        // std::vector<std::vector<size_t>> edgesVector = my_parser::ReadGraphToVector("../dsjc500.1.col");
         myTestMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../matr.col");
         std::cout << "Finished files reading\n";
+        // n = 200;
+        // for (int i = 0; i < edgesVector.size(); i++) {
+        //     graph[edgesVector[i][0]][edgesVector[i][1]] = 1;
+        //     graph[edgesVector[i][1]][edgesVector[i][0]] = 1;
+        //     d[edgesVector[i][0]]++;
+        //     d[edgesVector[i][1]]++;
+        // }
+    
+        std::cout << "Max cliques: " << maxCliques(0, 1) << '\n';
         //const auto resColors = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
         auto start = std::chrono::high_resolution_clock::now();
         const auto cliques = Algorithm<adjMatr_type>::maxCliqueFinding(otherAdjMatr);
@@ -49,20 +109,9 @@ int main(int argc, char ** argv) {
             }
             myFile << '\n';
         }
-        // for (const auto& el : cliques)
-        // {
-        //     if (el.size() == maxClique)
-        //     {
-        //         for (const auto& vert : el)
-        //         {
-        //             std::cout << vert + 1 << '\t';
-        //         }
-        //         std::cout << '\n';
-        //     }
-        // }
         myFile << "Num cliques: " << cliques.size() << '\n';
         std::cout << "Max clique size: " << maxClique << '\n';
-        double time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        double time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
         std::cout << "Measured time: " << time << "in microseconds\n";
         myFile.close();
         // std::cout << "Res colors: " << resColors.size() << '\n';
