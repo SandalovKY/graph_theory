@@ -83,7 +83,53 @@ ParseFile(char const* filename)
 }
 
 my::ColoredGraph
-ReadColoredGraphToAdjList(json::value const& jv)
+ReadDimacsGraphToAdjList(char const* filename)
+{
+    std::ifstream inputFile(filename);
+    if (inputFile.is_open())
+    {
+        std::cout << "Opened file\n";
+        size_t fileSize{ 0 };
+        std::string line;
+        std::getline(inputFile, line);
+        std::vector<std::string> parsedLine;
+        boost::split(parsedLine, line, [](char c){ return c == ' '; });
+
+        while (parsedLine[0] != "p")
+        {
+            std::getline(inputFile, line);
+            boost::split(parsedLine, line, [](char c){ return c == ' '; });
+        }
+
+        if (parsedLine.size() < 4) return my::ColoredGraph();
+        my::ColoredGraph retAdjList(std::stoi(parsedLine[2]));
+        retAdjList[boost::graph_bundle].numProc = std::stoi(parsedLine[2]);
+
+        // std::cout << adjMatrRet.getMatrDimSize() << std::endl;
+
+        std::getline(inputFile, line);
+        boost::split(parsedLine, line, [](char c){ return c == ' '; });
+
+        while (parsedLine[0] == "e")
+        {
+            int v_first = std::stoi(parsedLine[1]);
+            int v_second = std::stoi(parsedLine[2]);
+            using vDescr = my::ColoredGraph::vertex_descriptor;
+            vDescr first = boost::vertex(v_first - 1, retAdjList);
+            vDescr second = boost::vertex(v_second - 1, retAdjList);
+            boost::add_edge(first, second, retAdjList);
+            std::getline(inputFile, line);
+            boost::split(parsedLine, line, [](char c){ return c == ' '; });
+        }
+
+        return retAdjList;
+    }
+    std::cout << "Error while file reading" << std::endl;
+    return my::ColoredGraph();
+}
+
+my::ColoredGraph
+ReadJsonGraphToAdjList(json::value const& jv)
 {
     if (jv.kind() != json::kind::object) return my::ColoredGraph();
     
@@ -122,7 +168,7 @@ ReadColoredGraphToAdjList(json::value const& jv)
 
 template <typename ListType>
 typename my::BitAdjacencyMatrix<ListType>
-ReadGraphToAdjMatr(char const* filename)
+ReadDimacsGraphToAdjMatr(char const* filename)
 {
     // std::cout << "Inside function\n";
     std::ifstream inputFile(filename);
@@ -166,7 +212,8 @@ ReadGraphToAdjMatr(char const* filename)
     return my::BitAdjacencyMatrix<ListType>{};
 }
 
-std::vector<std::vector<size_t>> ReadGraphToVector(char const* filename)
+std::vector<std::vector<size_t>>
+ReadDimacsGraphToVector(char const* filename)
 {
     // std::cout << "Inside function\n";
     std::ifstream inputFile(filename);
@@ -210,7 +257,7 @@ std::vector<std::vector<size_t>> ReadGraphToVector(char const* filename)
 
 template <typename ListType>
 typename my::BitAdjacencyMatrix<ListType>::m_matrix_type
-ReadColoredGraphToAdjMatr(json::value const& jv)
+ReadJsonGraphToAdjMatr(json::value const& jv)
 {
     if (jv.kind() != json::kind::object) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
     auto const& obj = jv.get_object();

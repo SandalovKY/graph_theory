@@ -5,10 +5,19 @@
 #include <set>
 #include <map>
 #include <unordered_map>
-// #include <stack>
 
 template<typename Graph>
-struct Algorithm;
+struct Algorithm
+{
+    size_t m_maxIter = 1;
+    my::AntColony m_colony;
+    Algorithm(Graph& graph, size_t numAnts = 10, size_t maxIter = 4000) : m_colony(graph, numAnts), m_maxIter(maxIter) {}
+
+    void coloring()
+    {
+        m_colony.doWork(m_maxIter);
+    }
+};
 
 template<typename NeighboursList>
 struct Algorithm<my::BitAdjacencyMatrix<NeighboursList> >

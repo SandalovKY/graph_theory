@@ -1,6 +1,6 @@
 #include "graph.hpp"
 #include "algorithm.hpp"
-#include "parse_input_json.hpp"
+#include "graph_file_parser.hpp"
 #include "bitset.h"
 #include <iostream>
 #include <map>
@@ -69,6 +69,7 @@ int main(int argc, char ** argv) {
     }
 
     my::ColoredGraph resGraph;
+    my::ColoredGraph otherGraph;
     using bitset_type = myDynamicBitset<>;
     using adjMatr_type = my::BitAdjacencyMatrix<bitset_type>; 
     adjMatr_type resAdjMatr;
@@ -76,24 +77,37 @@ int main(int argc, char ** argv) {
     adjMatr_type myTestMatr;
     try
     {
+        std::cout << "Start to input col graph files\n";
         auto const jv = my_parser::ParseFile(argv[1]);
-        resGraph = my_parser::ReadColoredGraphToAdjList(jv);
-        resAdjMatr = my_parser::ReadColoredGraphToAdjMatr<bitset_type>(jv);
-        std::cout << "Start to input col graph file\n";
-        otherAdjMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../dsjc500.1.col");
-        // std::vector<std::vector<size_t>> edgesVector = my_parser::ReadGraphToVector("../dsjc500.1.col");
-        myTestMatr = my_parser::ReadGraphToAdjMatr<bitset_type>("../matr.col");
+        resGraph = my_parser::ReadJsonGraphToAdjList(jv);
+        resAdjMatr = my_parser::ReadJsonGraphToAdjMatr<bitset_type>(jv);
+        otherAdjMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>("../dsjc500.1.col");
+        otherGraph = my_parser::ReadDimacsGraphToAdjList("../dsjc500.1.col");
+        // boost::print_graph(otherGraph);
+        myTestMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>("../matr.col");
         std::cout << "Finished files reading\n";
-        // n = 200;
-        // for (int i = 0; i < edgesVector.size(); i++) {
-        //     graph[edgesVector[i][0]][edgesVector[i][1]] = 1;
-        //     graph[edgesVector[i][1]][edgesVector[i][0]] = 1;
-        //     d[edgesVector[i][0]]++;
-        //     d[edgesVector[i][1]]++;
-        // }
+
+        Algorithm alg(otherGraph);
+        alg.coloring();
+
+        auto colRes = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
+
+        std::cout << "Greedy result: " << colRes.size() << std::endl;
+
+        std::cout << "NotColoredVert:\n";
+
+        std::pair<my::ColoredGraph::vertex_iterator, my::ColoredGraph::vertex_iterator> adjLPair;
+        size_t nonColVert{};
+        for (adjLPair = boost::vertices(otherGraph); adjLPair.first != adjLPair.second; ++adjLPair.first)
+        {
+            if (otherGraph[*(adjLPair.first)].GroupId == -1)
+            {
+                ++nonColVert;
+                // std::cout << *(adjLPair.first) << std::endl;
+            }
+        }
+        std::cout << "Non Col Vet: " << nonColVert << std::endl;
     
-        std::cout << "Max cliques: " << maxCliques(0, 1) << '\n';
-        //const auto resColors = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
         auto start = std::chrono::high_resolution_clock::now();
         const auto cliques = Algorithm<adjMatr_type>::maxCliqueFinding(otherAdjMatr);
         auto end = std::chrono::high_resolution_clock::now();
@@ -112,17 +126,8 @@ int main(int argc, char ** argv) {
         myFile << "Num cliques: " << cliques.size() << '\n';
         std::cout << "Max clique size: " << maxClique << '\n';
         double time = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-        std::cout << "Measured time: " << time << "in microseconds\n";
+        std::cout << "Measured time: " << time << " in microseconds\n";
         myFile.close();
-        // std::cout << "Res colors: " << resColors.size() << '\n';
-        // for (const auto& el : resColors)
-        // {
-        //     for (const auto& vert : el)
-        //     {
-        //         std::cout << vert << '\t';
-        //     }
-        //     std::cout << '\n';
-        // }
     }
     catch(std::exception const& e)
     {
@@ -130,39 +135,6 @@ int main(int argc, char ** argv) {
             "Caught exception: "
             << e.what() << std::endl;
         return EXIT_FAILURE;
-    }
-
-    using name_map_t = boost::property_map<my::ColoredGraph, boost::vertex_name_t>::type;
-    using color_map_t = boost::property_map<my::ColoredGraph, boost::vertex_color_t>::type;
-    using colored_graph_descr_t = boost::graph_traits<my::ColoredGraph>::vertex_descriptor;
-
-    using node_pair = std::pair<boost::graph_traits<my::ColoredGraph>::vertex_descriptor, size_t>;
-
-    using my_map_t = std::map<boost::graph_traits<my::ColoredGraph>::vertex_descriptor, size_t>;
-
-    name_map_t mapForNames{};
-    color_map_t mapForColors{};
-
-    boost::graph_traits<my::ColoredGraph>::vertex_iterator vi, vi_end;
-    boost::graph_traits<my::ColoredGraph>::in_edge_iterator iei, iei_end;
-    colored_graph_descr_t descr;
-    std::tie(vi, vi_end) = boost::vertices(resGraph);
-
-    size_t color{ 0 };
-    my_map_t mapForNodes{};
-
-    for (;vi != vi_end; ++vi)
-    {
-        descr = *vi;
-        mapForNodes.emplace(std::make_pair(descr, 0));
-        boost::put(mapForNames, descr, "Vert");
-        boost::put(mapForColors, descr, color++);
-    }
-    std::tie(vi, vi_end) = boost::vertices(resGraph);
-    for (;vi != vi_end; ++vi)
-    {
-        std::cout << boost::get(mapForNames, *vi) << '\t';
-        std::cout << boost::get(mapForColors, *vi) << '\n';
     }
     std::cout << "AdjBitMatr:\n";
     auto size = resAdjMatr.getMatrDimSize();

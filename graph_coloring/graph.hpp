@@ -1,15 +1,34 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include <string>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_utility.hpp>
+#include <boost/graph/graphviz.hpp>
 #include <boost/dynamic_bitset.hpp>
 
 namespace my
 {
-using Vertex_color_p = boost::property<boost::vertex_color_t, size_t>;
-using ColoredGraph = boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS,
-                                                   boost::property<boost::vertex_name_t,
-                                                   std::string, Vertex_color_p>, boost::no_property>;
+
+// Graph properties
+struct ProcessInfo
+{
+    int64_t procId{};
+    int32_t GroupId{-1};
+};
+
+struct ProcessDependencies
+{
+    int32_t depType{};
+};
+
+struct SystemInfo
+{
+    int64_t numProc{};
+};
+
+// Main graph structure
+using ColoredGraph = boost::adjacency_list<boost::setS, boost::vecS, boost::undirectedS, ProcessInfo, ProcessDependencies, SystemInfo>;
 
 
 template <typename NeighboursList>
