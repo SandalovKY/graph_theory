@@ -170,7 +170,6 @@ template <typename ListType>
 typename my::BitAdjacencyMatrix<ListType>
 ReadDimacsGraphToAdjMatr(char const* filename)
 {
-    // std::cout << "Inside function\n";
     std::ifstream inputFile(filename);
     if (inputFile.is_open())
     {
@@ -190,8 +189,6 @@ ReadDimacsGraphToAdjMatr(char const* filename)
         if (parsedLine.size() < 4) return my::BitAdjacencyMatrix<ListType>{};
         my::BitAdjacencyMatrix<ListType> adjMatrRet{ static_cast<typename my::BitAdjacencyMatrix<ListType>::m_vertex_num_type>(std::stoi(parsedLine[2])),
             static_cast<typename my::BitAdjacencyMatrix<ListType>::m_edges_num_type>(std::stoi(parsedLine[3])) };
-
-        // std::cout << adjMatrRet.getMatrDimSize() << std::endl;
 
         std::getline(inputFile, line);
         boost::split(parsedLine, line, [](char c){ return c == ' '; });
@@ -215,7 +212,6 @@ ReadDimacsGraphToAdjMatr(char const* filename)
 std::vector<std::vector<size_t>>
 ReadDimacsGraphToVector(char const* filename)
 {
-    // std::cout << "Inside function\n";
     std::ifstream inputFile(filename);
     if (inputFile.is_open())
     {
@@ -234,8 +230,6 @@ ReadDimacsGraphToVector(char const* filename)
 
         if (parsedLine.size() < 4) return {};
         std::vector<std::vector<size_t>> retVector(std::stoi(parsedLine[3]), {0, 0});
-
-        // std::cout << adjMatrRet.getMatrDimSize() << std::endl;
 
         std::getline(inputFile, line);
         boost::split(parsedLine, line, [](char c){ return c == ' '; });

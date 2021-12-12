@@ -88,9 +88,20 @@ int main(int argc, char ** argv) {
         std::cout << "Finished files reading\n";
 
         Algorithm alg(otherGraph);
+        auto start1 = std::chrono::high_resolution_clock::now();
         alg.coloring();
+        auto end1 = std::chrono::high_resolution_clock::now();
+        double time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
 
+        std::cout << "Ant algorithm time: " << time1 << std::endl;
+
+        start1 = std::chrono::high_resolution_clock::now();
         auto colRes = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
+        end1 = std::chrono::high_resolution_clock::now();
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+
+        std::cout << "Bit Greedy time: " << time1 << std::endl;
 
         std::cout << "Greedy result: " << colRes.size() << std::endl;
 

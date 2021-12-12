@@ -34,7 +34,6 @@ private:
     }
 
 public:
-    // default constructor
     myDynamicBitset()
         : m_block_size(sizeof(m_block_type) * 8),
           m_last_set_bit_num(-1),
@@ -49,7 +48,6 @@ public:
           m_block_vector(m_block_num)
     {}
 
-    // move constructor
     myDynamicBitset(myDynamicBitset&& other)
         : m_block_vector(std::move(other.m_block_vector)),
           m_last_set_bit_num(other.m_last_set_bit_num),
@@ -61,7 +59,6 @@ public:
         other.m_block_size = 0;
     }
 
-    // copy constructor
     myDynamicBitset(const myDynamicBitset& other)
         : m_block_vector(other.m_block_vector),
           m_last_set_bit_num(other.m_last_set_bit_num),
@@ -69,7 +66,6 @@ public:
           m_block_size(other.m_block_size)
     {}
 
-    // move assignment
     void operator=(myDynamicBitset&& other)
     {
         m_block_vector = std::move(other.m_block_vector);
@@ -83,7 +79,6 @@ public:
         other.m_block_size = 0;
     }
 
-    // copy assignment
     void operator=(const myDynamicBitset& other)
     {
         m_block_vector = other.m_block_vector;
@@ -104,13 +99,11 @@ public:
         return true;
     }
 
-    // getting number of filled blocks
     m_bit_position_type num_blocks() const
     {
         return m_block_num;
     }
 
-    // setting definite bit 
     bool set(m_bit_position_type bitPos)
     {
         if (m_last_set_bit_num < bitPos) m_last_set_bit_num = bitPos;
@@ -131,9 +124,7 @@ public:
     {
         if (m_last_set_bit_num < bitPos) return false;
         const m_bit_position_type block_num = bitPos / m_block_size;
-        // std::cout << "Block num: " << block_num << std::endl;
         const m_block_size_type block_offset = bitPos % m_block_size;
-        // std::cout << "Block offset: " << block_offset << std::endl;
 
         if (block_num >= m_block_vector.size()) return false;
         m_block_vector[block_num] &= ~(m_block_type{ 1 } << block_offset);
