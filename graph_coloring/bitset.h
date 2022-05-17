@@ -1,34 +1,34 @@
-#include <vector>
 #include <cstdint>
+#include <vector>
 #include <iostream>
-
-namespace
-{
-    const int64_t min_num_blocks = 100;
-    const int64_t npos = -1;
-}
 
 template <typename BlockType = uint64_t>
 class myDynamicBitset
 {
 public:
     using m_block_type = BlockType;
-    using m_block_size_type = uint32_t;
-    using m_bit_position_type = int64_t;
+    using m_block_size_type = uint16_t;
+    using m_bit_position_type = int32_t;
     using m_block_iterator_type = typename std::vector<m_block_type>::iterator;
     using m_block_const_iterator_type = typename std::vector<m_block_type>::const_iterator;
 private:
+    static const int64_t min_num_blocks = 100;
+    static const int64_t npos = -1;
+
     m_bit_position_type m_block_num{};
     m_bit_position_type m_last_set_bit_num{}; 
     m_block_size_type m_block_size{};
     std::vector<m_block_type> m_block_vector{};
+    size_t m_id{};
+    size_t m_color{};
+    size_t m_dimSize{};
 
-    static bool m_block_not_empty(const m_block_type& block)
+    static bool inline m_block_not_empty(const m_block_type& block)
     {
-        return block != m_block_type{ 0 };
+        return block != m_block_type{};
     }
 
-    m_block_size_type getLowestBit(const m_block_type& block) const
+    static m_block_size_type inline getLowestBit(const m_block_type& block)
     {
         return __builtin_ctzll(block);
     }
@@ -45,14 +45,18 @@ public:
         : m_block_size(sizeof(m_block_type) * 8),
           m_last_set_bit_num(numBits - 1),
           m_block_num(numBits / (sizeof(m_block_type) * 8) + 1),
-          m_block_vector(m_block_num)
+          m_block_vector(m_block_num),
+          m_dimSize(numBits)
     {}
 
     myDynamicBitset(myDynamicBitset&& other)
         : m_block_vector(std::move(other.m_block_vector)),
           m_last_set_bit_num(other.m_last_set_bit_num),
           m_block_num(other.m_block_num),
-          m_block_size(other.m_block_size)
+          m_block_size(other.m_block_size),
+          m_id(other.m_id),
+          m_color(other.m_color),
+          m_dimSize(other.m_dimSize)
     {
         other.m_last_set_bit_num = -1;
         other.m_block_num = 0;
@@ -63,8 +67,19 @@ public:
         : m_block_vector(other.m_block_vector),
           m_last_set_bit_num(other.m_last_set_bit_num),
           m_block_num(other.m_block_num),
-          m_block_size(other.m_block_size)
+          m_block_size(other.m_block_size),
+          m_id(other.m_id),
+          m_color(other.m_color),
+          m_dimSize(other.m_dimSize)
     {}
+
+    void setId(size_t id) { m_id = id; }
+    size_t getId() const { return m_id; }
+
+    void setColor(size_t color) { m_color = color; }
+    size_t getColor() const { return m_color; }
+
+    size_t getDimSize() const { return m_dimSize; }
 
     void operator=(myDynamicBitset&& other)
     {
@@ -160,7 +175,7 @@ public:
         m_bit_position_type i = std::distance(m_block_vector.begin(), std::find_if(m_block_vector.begin(), m_block_vector.end(), m_block_not_empty));
         if (i >= num_blocks())
         {
-            return m_last_set_bit_num + 1;
+            return npos;
         }
         return i * m_block_size + static_cast<m_block_size_type>(getLowestBit(m_block_vector[i]));
     }

@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Graph_coloring VERSION 1.0)
+project(Graph_coloring VERSION 1.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-march=native)
 set(Boost_USE_STATIC_LIBS ON)
 
 file(GLOB src_graph "*.c" "*.cpp")
 
-if (NOT DEFINED ENV{BOOST_ROOT})
-    message(FATAL_ERROR "Path to the boost root wasn't defined.")
-endif()
+# if (NOT DEFINED ENV{BOOST_ROOT})
+#     message(FATAL_ERROR "Path to the boost root wasn't defined.")
+# endif()
 
 find_package(Boost 1.77.0 REQUIRED COMPONENTS json graph)
 if (NOT Boost_FOUND)

@@ -171,6 +171,7 @@ typename my::BitAdjacencyMatrix<ListType>
 ReadDimacsGraphToAdjMatr(char const* filename)
 {
     std::ifstream inputFile(filename);
+    // inputFile.open();
     if (inputFile.is_open())
     {
         std::cout << "Opened file\n";

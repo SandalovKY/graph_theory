@@ -1,7 +1,7 @@
 #include "graph.hpp"
 #include "algorithm.hpp"
+#include "segundo_max_clique.hpp"
 #include "graph_file_parser.hpp"
-#include "bitset.h"
 #include <iostream>
 #include <map>
 #include <utility>
@@ -9,56 +9,6 @@
 #include <chrono>
 #include <fstream>
 
-const int MAX = 500;
- 
-// Stores the vertices
-int store[MAX], n;
- 
-// Graph
-int graph[MAX][MAX];
- 
-// Degree of the vertices
-int d[MAX];
-
-bool is_clique(int b)
-{
- 
-    // Run a loop for all set of edges
-    for (int i = 1; i < b; i++) {
-        for (int j = i + 1; j < b; j++)
- 
-            // If any edge is missing
-            if (graph[store[i]][store[j]] == 0)
-                return false;
-    }
-    return true;
-}
-
-int maxCliques(int i, int l)
-{
-    // Maximal clique size
-    int max_ = 0;
- 
-    // Check if any vertices from i+1
-    // can be inserted
-    for (int j = i + 1; j <= n; j++) {
- 
-        // Add the vertex to store
-        store[l] = j;
- 
-        // If the graph is not a clique of size k then
-        // it cannot be a clique by adding another edge
-        if (is_clique(l + 1)) {
- 
-            // Update max
-            max_ = std::max(max_, l);
- 
-            // Check if another edge can be added
-            max_ = std::max(max_, maxCliques(j, l + 1));
-        }
-    }
-    return max_;
-}
 int main(int argc, char ** argv) {
     if(argc != 2)
     {
@@ -68,8 +18,6 @@ int main(int argc, char ** argv) {
         return EXIT_FAILURE;
     }
 
-    my::ColoredGraph resGraph;
-    my::ColoredGraph otherGraph;
     using bitset_type = myDynamicBitset<>;
     using adjMatr_type = my::BitAdjacencyMatrix<bitset_type>; 
     adjMatr_type resAdjMatr;
@@ -79,46 +27,78 @@ int main(int argc, char ** argv) {
     {
         std::cout << "Start to input col graph files\n";
         auto const jv = my_parser::ParseFile(argv[1]);
-        resGraph = my_parser::ReadJsonGraphToAdjList(jv);
         resAdjMatr = my_parser::ReadJsonGraphToAdjMatr<bitset_type>(jv);
-        otherAdjMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>("../dsjc500.1.col");
-        otherGraph = my_parser::ReadDimacsGraphToAdjList("../dsjc500.1.col");
-        // boost::print_graph(otherGraph);
+        otherAdjMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>("../matr.col");
         myTestMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>("../matr.col");
         std::cout << "Finished files reading\n";
 
-        Algorithm alg(otherGraph);
+        size_t adjMatrDimSize = otherAdjMatr.getMatrDimSize();
+        std::vector<std::pair<bitset_type, bool>> modAdjMatr{};
+        std::map<size_t, std::pair<bitset_type, bool>> hashedLines{};
+        std::map<size_t, bitset_type> hmodAdjMatr{};
+        
+
+        for (int ind = 0; ind < adjMatrDimSize; ++ind)
+        {
+            // std::cout << otherAdjMatr.getLine(ind) << std::endl;
+            myDynamicBitset tmp{};
+            tmp = otherAdjMatr.getLine(ind);
+            hmodAdjMatr.insert({ ind, tmp });
+            tmp.set(ind);
+            ~tmp;
+            tmp.setId(ind);
+            hashedLines.insert({ ind, { std::move(tmp), false } });
+        }
+
         auto start1 = std::chrono::high_resolution_clock::now();
-        alg.coloring();
-        auto end1 = std::chrono::high_resolution_clock::now();
-        double time1 = std::chrono::duration_cast<std::chrono::seconds>(end1 - start1).count();
-
-        std::cout << "Ant algorithm time: " << time1 << std::endl;
-
-        start1 = std::chrono::high_resolution_clock::now();
         auto colRes = Algorithm<adjMatr_type>::coloring(otherAdjMatr);
-        end1 = std::chrono::high_resolution_clock::now();
+        auto end1 = std::chrono::high_resolution_clock::now();
 
-        time1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1).count();
+        double time1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1).count();
 
         std::cout << "Bit Greedy time: " << time1 << std::endl;
 
         std::cout << "Greedy result: " << colRes.size() << std::endl;
 
-        std::cout << "NotColoredVert:\n";
+        // for (const auto& colGr: colRes)
+        // {
+        //     for (const auto& vert: colGr)
+        //     {
+        //         std::cout << vert << ' ';
+        //     }
+        //     std::cout << '\n';
+        // }
 
-        std::pair<my::ColoredGraph::vertex_iterator, my::ColoredGraph::vertex_iterator> adjLPair;
-        size_t nonColVert{};
-        for (adjLPair = boost::vertices(otherGraph); adjLPair.first != adjLPair.second; ++adjLPair.first)
-        {
-            if (otherGraph[*(adjLPair.first)].GroupId == -1)
-            {
-                ++nonColVert;
-                // std::cout << *(adjLPair.first) << std::endl;
-            }
-        }
-        std::cout << "Non Col Vet: " << nonColVert << std::endl;
+        start1 = std::chrono::high_resolution_clock::now();
+        auto colResMod = Algorithm<adjMatr_type>::coloring_mod(hashedLines);
+        end1 = std::chrono::high_resolution_clock::now();
+
+        time1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1).count();
+
+        std::cout << "Bit Greedy time for mod: " << time1 << std::endl;
+
+        std::cout << "Greedy result for mod: " << colResMod.size() << std::endl;
+
+        // for (const auto& colGr: colResMod)
+        // {
+        //     for (const auto& vert: colGr)
+        //     {
+        //         std::cout << vert.getId() << ' ';
+        //     }
+        //     std::cout << '\n';
+        // }
+
+        std::map<size_t, myDynamicBitset<>> inputMap{};
+        std::set<size_t> inputSet{ 9999 };
+
+
+
+        SegundoAlgorithm segAlg{};
+        segAlg.runMaxCliqueFinding(hmodAdjMatr);
+        auto& res = segAlg.maxClique;
     
+        std::cout << "Segundo alg res: " << res.size() << std::endl;
+
         auto start = std::chrono::high_resolution_clock::now();
         const auto cliques = Algorithm<adjMatr_type>::maxCliqueFinding(otherAdjMatr);
         auto end = std::chrono::high_resolution_clock::now();
