@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 #include <vector>
 #include <iostream>
@@ -41,12 +43,13 @@ public:
           m_block_vector(min_num_blocks, 0)
     {}
 
-    myDynamicBitset(m_bit_position_type numBits)
+    myDynamicBitset(m_bit_position_type numBits, size_t currVertexId)
         : m_block_size(sizeof(m_block_type) * 8),
           m_last_set_bit_num(numBits - 1),
           m_block_num(numBits / (sizeof(m_block_type) * 8) + 1),
           m_block_vector(m_block_num),
-          m_dimSize(numBits)
+          m_dimSize(numBits),
+          m_id(currVertexId)
     {}
 
     myDynamicBitset(myDynamicBitset&& other)
@@ -88,10 +91,16 @@ public:
         m_last_set_bit_num = other.m_last_set_bit_num;
         m_block_num = other.m_block_num;
         m_block_size = other.m_block_size;
+        m_id = other.m_id;
+        m_color = other.m_color;
+        m_dimSize = other.m_dimSize;
 
         other.m_last_set_bit_num = -1;
         other.m_block_num = 0;
         other.m_block_size = 0;
+        other.m_id = 0;
+        other.m_color = 0;
+        other.m_dimSize = 0;
     }
 
     void operator=(const myDynamicBitset& other)
@@ -101,6 +110,9 @@ public:
         m_last_set_bit_num = other.m_last_set_bit_num;
         m_block_num = other.m_block_num;
         m_block_size = other.m_block_size;
+        m_id = other.m_id;
+        m_color = other.m_color;
+        m_dimSize = other.m_dimSize;
     }
 
     friend bool operator==(const myDynamicBitset& l, const myDynamicBitset& r)

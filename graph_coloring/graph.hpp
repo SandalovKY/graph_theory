@@ -1,4 +1,5 @@
 #pragma once
+
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -59,9 +60,10 @@ public:
     BitAdjacencyMatrix(m_vertex_num_type vertex_num, m_edges_num_type edges_num = 0)
     : m_matrix(vertex_num), m_vertex_num(vertex_num), m_edges_num(edges_num)
     {
+        int currVertexId{ 0 };
         for (auto & vertex : m_matrix)
         {
-            vertex = NeighboursList(vertex_num);
+            vertex = NeighboursList(vertex_num, currVertexId++);
         }
     }
 

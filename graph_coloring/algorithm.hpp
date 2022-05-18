@@ -66,42 +66,6 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
         return resColors;
     }
 
-    static std::vector<std::vector<NeighboursList>> coloring_mod(std::map<size_t, std::pair<NeighboursList, bool>> adjMatr)
-    {
-        std::vector<std::vector<NeighboursList>> resColors{};
-        size_t dimSize = adjMatr.size();
-
-        for (auto& record: adjMatr)
-        {
-            auto& recordVal = record.second;
-            if (!recordVal.second)
-            {
-                resColors.push_back(std::vector<NeighboursList>());
-                auto& actualColorSet = *(resColors.end() - 1);
-                actualColorSet.push_back(recordVal.first);
-                recordVal.second = true;
-                auto& bitSet = recordVal.first;
-                size_t firstSetBitPos = bitSet.getFirstNonZeroPosition();
-                while (firstSetBitPos < dimSize && firstSetBitPos >= 0)
-                {
-                    auto& line = adjMatr.at(firstSetBitPos); 
-                    if (!line.second)
-                    {
-                        bitSet &= line.first;
-                        actualColorSet.push_back(line.first);
-                        line.second = true;
-                    }
-                    else
-                    {
-                        bitSet.unset(firstSetBitPos);
-                    }
-                    firstSetBitPos = bitSet.getFirstNonZeroPosition();
-                }
-            }
-        }
-        return resColors;
-    }
-
     static size_t maxCliqueFinding1(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
         size_t max_clique_size{ 0 };
@@ -313,61 +277,9 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
         return allMaxCliques;
     }
 
-    // static getNeighboursList
-
-    // static std::set<size_t> maxCliqueFindingSegundo(my::BitAdjacencyMatrix<NeighboursList>& adjMatr, std::set<size_t>& unusedVerticies,
-    //     std::set<size_t>& maxClique, size_t maxColoredVert)
-    // {
-    //     std::set<size_t> activeVerticies{};
-    //     std::set<size_t> retMaxCliqueSet{};
-    //     size_t dimSize = adjMatr.getMatrDimSize();
-
-    //     for (size_t ind = 0; ind < dimSize; ++ind)
-    //     {
-    //         adjMatr[ind].unset(ind);
-    //         if () constants::npos;
-    //     }
-
-    //     size_t curVertIndex{ 0 };
-
-    // }
-
     static std::set<size_t> maxCliqueFindingSegundo(std::vector<NeighboursList>& adjMatr)
     {
         std::set<size_t> foundMaxClique{};
         return foundMaxClique;
     }
-
-    // static std::set<size_t> maxCliquesFindingMyTest(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
-    // {
-    //     std::set<size_t> retMaxCliqueSet{};
-    //     size_t dimSize = adjMatr.getMatrDimSize();
-    //     size_t maxCliqueSize{ 0 };
-
-    //     size_t startPoint{ 0 };
-    //     for (size_t ind = startPoint; ind < dimSize; ++ind)
-    //     {
-    //         auto& curStartPointLine = adjMatr.getLine(ind);
-    //         auto curStartPointLineCopy = curStartPointLine;
-    //         std::vector<NeighboursList> tmpMatr{};
-    //         // for (size_t innerInd = startPoint; innerInd < dimSize; ++innerInd)
-    //         // {
-    //         //     auto curLine = adjMatr.getLine(innerInd);
-    //         //     if (innerInd != ind)
-    //         //     {                    
-    //         //         tmpMatr.emplace_back(curStartPointLine & curLine);
-    //         //     }
-    //         // }
-    //         // for (const auto& line: tmpMatr)
-    //         // {
-
-    //         // }
-    //         // std::vector<NeighboursList> tmpMatr{};
-    //         // bool allCliquesEnded{ false };
-    //         // while (!allCliquesEnded)
-    //         // {
-
-    //         // }
-    //     }
-    // }
 };

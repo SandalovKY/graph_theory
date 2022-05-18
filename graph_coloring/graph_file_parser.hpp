@@ -1,4 +1,5 @@
 #pragma once
+
 #include <boost/json.hpp>
 #include <boost/json/stream_parser.hpp>
 #include <boost/algorithm/string.hpp>
@@ -274,7 +275,7 @@ ReadJsonGraphToAdjMatr(json::value const& jv)
                 if (vertIt.value().kind() != json::kind::array) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
                 auto const& arrVert = vertIt.value().get_array();
                 typename my::BitAdjacencyMatrix<ListType>::m_vertex_num_type nbhdVert = vertObj.size();
-                typename my::BitAdjacencyMatrix<ListType>::m_string_type bitStr(nbhdVert);
+                typename my::BitAdjacencyMatrix<ListType>::m_string_type bitStr(nbhdVert, vertex);
                 for (auto const& arrVertIt : arrVert)
                 {
                     if (arrVertIt.kind() != json::kind::int64) return typename my::BitAdjacencyMatrix<ListType>::m_matrix_type{};
