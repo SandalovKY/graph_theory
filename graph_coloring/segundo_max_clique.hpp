@@ -8,10 +8,13 @@ class SegundoAlgorithm
 {
 public:
     using bitset_type = myDynamicBitset<>;
+    using index_lines = std::map<size_t, bitset_type>;
+    using index_lines_with_flags = std::map<size_t, std::pair<bitset_type, bool>>;
     std::set<size_t> maxClique{};
     void runMaxCliqueFinding(std::map<size_t, bitset_type>& adjMatr);
 private:
-    std::map<size_t, bitset_type> coloring(std::map<size_t, std::pair<bitset_type, bool>> adjMatr, size_t currMaxCliqueSize);
-    std::map<size_t, std::pair<bitset_type, bool>> getNeighbours(std::map<size_t, bitset_type>& adjMatr, bitset_type& currBitset);
-    void maxCliqueFindingSegundo(std::map<size_t, bitset_type>& adjMatr, std::set<size_t>& currMaxCLique);
+    index_lines coloring(index_lines& adjMatr, int32_t currMaxCliqueSize);    //
+    index_lines getNeighbours(const index_lines& adjMatr, bitset_type& currBitset);   //
+    void maxCliqueFindingSegundo(std::map<size_t, bitset_type>& adjMatr,
+        std::map<size_t, bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique);
 };

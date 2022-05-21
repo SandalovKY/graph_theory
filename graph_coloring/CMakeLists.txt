@@ -4,7 +4,7 @@ project(Graph_coloring VERSION 1.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-add_compile_options(-march=native)
+add_compile_options(-march=native -O3)
 set(Boost_USE_STATIC_LIBS ON)
 
 file(GLOB src_graph "*.c" "*.cpp")

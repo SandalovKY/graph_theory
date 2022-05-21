@@ -4,48 +4,49 @@
 
 void SegundoAlgorithm::runMaxCliqueFinding(std::map<size_t, bitset_type>& adjMatr)
 {
-    for (auto& vertex: adjMatr)
-    {
-        auto coloredVertexes = this->coloring(this->getNeighbours(adjMatr, vertex.second), 0);
-        if (!coloredVertexes.empty())
-        {
-            vertex.second.setColor((--coloredVertexes.end())->second.getColor());
-        }
-    }
     std::set<size_t> defSet{};
-    this->maxCliqueFindingSegundo(adjMatr, defSet);
+    std::map<size_t, bitset_type> copyMatr = adjMatr;
+    this->maxCliqueFindingSegundo(adjMatr, copyMatr, defSet);
 }
 
-std::map<size_t, SegundoAlgorithm::bitset_type> SegundoAlgorithm::coloring(std::map<size_t, std::pair<bitset_type, bool>> adjMatr, size_t currMaxCliqueSize)
+SegundoAlgorithm::index_lines SegundoAlgorithm::coloring(index_lines& adjMatr, int32_t currMaxCliqueSize)
 {
+    std::map<size_t, bool> isIncludedArray{};
     std::map<size_t, bitset_type> resCols{};
-    size_t dimSize = adjMatr.size();
-    size_t currColor{ 0 };
+    std::vector<bitset_type> allowedVerts{};
+    size_t dimSize{ 0 };
+    if (!adjMatr.empty())
+    {
+        dimSize = adjMatr.begin()->second.getDimSize();
+    }
+    int32_t currColor{ 1 };
 
     for (auto& record: adjMatr)
     {
         auto& recordVal = record.second;
-        if (!recordVal.second)
+        if (!isIncludedArray[record.first])
         {
-            recordVal.first.setColor(currColor);
-            SegundoAlgorithm::bitset_type bitSet = recordVal.first;
-            if (this->maxClique.size() - (currMaxCliqueSize - 1) <= currColor)
+            recordVal.setColor(currColor);
+            SegundoAlgorithm::bitset_type bitSet = recordVal;
+            ~record.second;
+            if ((int32_t)(this->maxClique.size() - currMaxCliqueSize + 1) <= currColor)
             {
-                resCols.insert({record.first, ~record.second.first});
+                resCols.insert({record.first, record.second});
             }
-            recordVal.second = true;
+            isIncludedArray[record.first] = true;
             size_t firstSetBitPos = bitSet.getFirstNonZeroPosition();
             while (firstSetBitPos < dimSize && firstSetBitPos >= 0)
             {
-                if (adjMatr.contains(firstSetBitPos) && !adjMatr[firstSetBitPos].second)
+                if (adjMatr.contains(firstSetBitPos) && !isIncludedArray[firstSetBitPos])
                 {
-                    bitSet &= adjMatr[firstSetBitPos].first;
-                    adjMatr[firstSetBitPos].first.setColor(currColor);
-                    if (this->maxClique.size() - (currMaxCliqueSize - 1) <= currColor)
+                    bitSet &= adjMatr[firstSetBitPos];
+                    adjMatr[firstSetBitPos].setColor(currColor);
+                    ~adjMatr[firstSetBitPos];
+                    if ((int32_t)(this->maxClique.size() - currMaxCliqueSize + 1) <= currColor)
                     {
-                        resCols.insert({ firstSetBitPos, ~adjMatr[firstSetBitPos].first });
+                        resCols.insert({ firstSetBitPos, adjMatr[firstSetBitPos] });
                     }
-                    adjMatr[firstSetBitPos].second = true;
+                    isIncludedArray[firstSetBitPos] = true;
                 }
                 bitSet.unset(firstSetBitPos);
                 firstSetBitPos = bitSet.getFirstNonZeroPosition();
@@ -56,55 +57,53 @@ std::map<size_t, SegundoAlgorithm::bitset_type> SegundoAlgorithm::coloring(std::
     return resCols;
 }
 
-void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, SegundoAlgorithm::bitset_type>& adjMatr, std::set<size_t>& currMaxCLique)
+void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, SegundoAlgorithm::bitset_type>& adjMatr,
+    std::map<size_t, SegundoAlgorithm::bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique)
 {
-    while (!adjMatr.empty())
+    while (!allowedVerts.empty())
     {
-        auto currLine = *(--adjMatr.end());
-        std::cout << currLine.second.getId() << std::endl;
-        adjMatr.erase(currLine.first);
-        if (currMaxCLique.size() + currLine.second.getColor() > this->maxClique.size())
+        auto currLine = *(--allowedVerts.end());
+        allowedVerts.erase(currLine.first);
+        currMaxCLique.insert(currLine.first);
+
+        index_lines nearVerts = this->getNeighbours(adjMatr, currLine.second);
+        
+        std::map<size_t, SegundoAlgorithm::bitset_type> coloredVerts = this->coloring(nearVerts, currMaxCLique.size());
+        if (!coloredVerts.empty())
         {
-            currMaxCLique.insert(currLine.first);
-            std::map<size_t, SegundoAlgorithm::bitset_type> coloredVerts = this->coloring(this->getNeighbours(adjMatr, currLine.second), currMaxCLique.size());
-            if (!coloredVerts.empty())
-            {
-                SegundoAlgorithm::maxCliqueFindingSegundo(coloredVerts, currMaxCLique);
-            }
-            else
-            {
-                if (currMaxCLique.size() > this->maxClique.size())
-                {
-                    this->maxClique = currMaxCLique;
-                }
-            }
-            currMaxCLique.erase(currLine.first);
+            if (currMaxCLique.size() + ((--coloredVerts.end())->second.getColor()) > this->maxClique.size())
+                SegundoAlgorithm::maxCliqueFindingSegundo(nearVerts, coloredVerts, currMaxCLique);
         }
-        else return;
+        else
+        {
+            if (currMaxCLique.size() > this->maxClique.size())
+            {
+                this->maxClique = currMaxCLique;
+            }
+        }
+        currMaxCLique.erase(currLine.first);
     }
 }
 
-std::map<size_t, std::pair<SegundoAlgorithm::bitset_type, bool>> SegundoAlgorithm::getNeighbours(std::map<size_t, SegundoAlgorithm::bitset_type>& adjMatr, SegundoAlgorithm::bitset_type& bitset)
+SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighbours(const index_lines& adjMatr, bitset_type& bitset)
 {
-    std::map<size_t, std::pair<SegundoAlgorithm::bitset_type, bool>> retMap{};
+    index_lines retMap{};
     size_t dimSize = bitset.getDimSize();
     bitset.unset(bitset.getId());
-    SegundoAlgorithm::bitset_type localBitset = bitset;
+    bitset_type localBitset = bitset;
     size_t firstSetBitPos = localBitset.getFirstNonZeroPosition();
     while (firstSetBitPos < dimSize && firstSetBitPos >= 0)
     {
         if (adjMatr.contains(firstSetBitPos))
         {
-            SegundoAlgorithm::bitset_type line = adjMatr[firstSetBitPos];
+            bitset_type line = adjMatr.at(firstSetBitPos);
             line &= bitset;
-            // line.setId(firstSetBitPos);
             line.set(firstSetBitPos);
             ~line;
-            retMap.insert({ firstSetBitPos, { std::move(line), false } });
+            retMap.insert({ firstSetBitPos, std::move(line) });
         }
         localBitset.unset(firstSetBitPos);
         firstSetBitPos = localBitset.getFirstNonZeroPosition();
     }
-    // bitset.set(bitset.getId());
     return retMap;
 }

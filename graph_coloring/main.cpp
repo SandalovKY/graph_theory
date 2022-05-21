@@ -37,7 +37,7 @@ int main(int argc, char ** argv) {
 
         for (int ind = 0; ind < adjMatrDimSize; ++ind)
         {
-            myDynamicBitset tmp{};
+            myDynamicBitset<> tmp{};
             tmp = otherAdjMatr.getLine(ind);
             hmodAdjMatr.insert({ ind, tmp });
             tmp.set(ind);
@@ -56,19 +56,15 @@ int main(int argc, char ** argv) {
 
         std::cout << "Greedy result: " << colRes.size() << std::endl;
 
-        start1 = std::chrono::high_resolution_clock::now();
-        auto colResMod = Algorithm<adjMatr_type>::coloring_mod(hashedLines);
-        end1 = std::chrono::high_resolution_clock::now();
-
-        time1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1).count();
-
-        std::cout << "Bit Greedy time for mod: " << time1 << std::endl;
-
-        std::cout << "Greedy result for mod: " << colResMod.size() << std::endl;
-
         SegundoAlgorithm segAlg{};
+        start1 = std::chrono::high_resolution_clock::now();
         segAlg.runMaxCliqueFinding(hmodAdjMatr);
+        end1 = std::chrono::high_resolution_clock::now();
         auto& res = segAlg.maxClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+
+        std::cout << "Seg alg time: " << time1 << std::endl;
     
         std::cout << "Segundo alg res: " << res.size() << std::endl;
         for (const auto& vert: res)
