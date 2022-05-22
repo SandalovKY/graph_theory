@@ -47,7 +47,7 @@ public:
         : m_block_size(sizeof(m_block_type) * 8),
           m_last_set_bit_num(numBits - 1),
           m_block_num(numBits / (sizeof(m_block_type) * 8) + 1),
-          m_block_vector(m_block_num),
+          m_block_vector(m_block_num, 0),
           m_dimSize(numBits),
           m_id(currVertexId)
     {}
@@ -212,7 +212,7 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator&(const myDynamicBitset lhs, const myDynamicBitset& rhs)
+    friend myDynamicBitset operator&(myDynamicBitset& lhs, const myDynamicBitset& rhs)
     {
         myDynamicBitset tmp{ lhs };
         tmp &= rhs;
@@ -221,7 +221,7 @@ public:
 
     myDynamicBitset& operator|=(const myDynamicBitset& other)
     {
-        if (this->m_block_num != other.block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
+        if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
         for(size_t block = 0; block < this->m_block_num; ++block)
         {
             this->m_block_vector[block] |= other.m_block_vector[block];
@@ -229,7 +229,7 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator|(myDynamicBitset lhs, const myDynamicBitset& rhs)
+    friend myDynamicBitset operator|(myDynamicBitset& lhs, const myDynamicBitset& rhs)
     {
         myDynamicBitset tmp{ lhs };
         tmp |= rhs;
@@ -246,7 +246,7 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator^(myDynamicBitset lhs, const myDynamicBitset& rhs)
+    friend myDynamicBitset operator^(myDynamicBitset& lhs, const myDynamicBitset& rhs)
     {
         myDynamicBitset tmp{ lhs };
         tmp ^= rhs;

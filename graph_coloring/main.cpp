@@ -72,6 +72,22 @@ int main(int argc, char ** argv) {
             std::cout << vert << ' ';
         }
         std::cout << std::endl;
+
+        start1 = std::chrono::high_resolution_clock::now();
+        segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
+        end1 = std::chrono::high_resolution_clock::now();
+        res = segAlg.maxClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+
+        std::cout << "Seg alg mod time: " << time1 << std::endl;
+    
+        std::cout << "Segundo alg mod res: " << res.size() << std::endl;
+        for (const auto& vert: res)
+        {
+            std::cout << vert << ' ';
+        }
+        std::cout << std::endl;
     }
     catch(std::exception const& e)
     {
