@@ -120,12 +120,10 @@ void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, bitset_type>& ad
             currMaxCLique.insert(currLine.first);
             // Get all near verticies that was conjuncted with currLine
             index_lines nearVerts = this->getNeighbours(adjMatr, currLine.second);
-            
-            std::map<size_t, SegundoAlgorithm::bitset_type> coloredVerts = this->coloring(nearVerts, static_cast<int32_t>(this->maxClique.size() - currMaxCLique.size() + 1));
-            if (!coloredVerts.empty())
+            if (!nearVerts.empty())
             {
-                // if (currMaxCLique.size() + ((--coloredVerts.end())->second.getColor()) > this->maxClique.size())
-                SegundoAlgorithm::maxCliqueFindingSegundo(nearVerts, coloredVerts, currMaxCLique);
+                index_lines coloredVerts = this->coloring(nearVerts, static_cast<int32_t>(this->maxClique.size() - currMaxCLique.size() + 1));
+                maxCliqueFindingSegundo(nearVerts, coloredVerts, currMaxCLique);
             }
             else
             {
@@ -152,12 +150,11 @@ void SegundoAlgorithm::maxCliqueFindingSegundo_mod_1(std::map<size_t, bitset_typ
             currMaxCLique.insert(currLine.first);
             // Get all near verticies that was conjuncted with currLine
             index_lines nearVerts = this->getNeighbours_mod_1(adjMatr, currLine.second);
-            
-            std::map<size_t, SegundoAlgorithm::bitset_type> coloredVerts = this->coloring_mod_1(nearVerts, static_cast<int32_t>(this->maxClique.size() - currMaxCLique.size() + 1));
-            if (!coloredVerts.empty())
+
+            if (!nearVerts.empty())
             {
-                // if (currMaxCLique.size() + ((--coloredVerts.end())->second.getColor()) > this->maxClique.size())
-                SegundoAlgorithm::maxCliqueFindingSegundo_mod_1(nearVerts, coloredVerts, currMaxCLique);
+                index_lines coloredVerts = this->coloring_mod_1(nearVerts, static_cast<int32_t>(this->maxClique.size() - currMaxCLique.size() + 1));
+                maxCliqueFindingSegundo_mod_1(nearVerts, coloredVerts, currMaxCLique);
             }
             else
             {
@@ -207,7 +204,6 @@ SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighbours_mod_1(index_lines&
         {
             bitset_type line = adjMatr[firstSetBitPos];
             line &= bitset;
-            line.set(firstSetBitPos);
             retMap.insert({ firstSetBitPos, std::move(line) });
         }
         localBitset.unset(firstSetBitPos);

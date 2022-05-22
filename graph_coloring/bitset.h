@@ -177,7 +177,7 @@ public:
         size_t count{ 0 };
         for (const auto& block : bitset.m_block_vector)
         {
-            count += __builtin_popcount(block);
+            count += __builtin_popcountll(block);
         }
         return count;
     }
