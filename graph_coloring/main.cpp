@@ -45,32 +45,56 @@ int main(int argc, char ** argv) {
 
         SegundoAlgorithm segAlg{};
         auto start1 = std::chrono::high_resolution_clock::now();
-        segAlg.runMaxCliqueFinding(hmodAdjMatr);
+        // segAlg.runMaxCliqueFinding(hmodAdjMatr);
         auto end1 = std::chrono::high_resolution_clock::now();
         auto& res = segAlg.maxClique;
 
         auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg time: " << time1 << std::endl;
-        std::cout << "Segundo alg res: " << res.size() << std::endl;
+        std::cout << "Results: " << res.size() << std::endl;
         for (const auto& vert: res)
         {
             std::cout << vert << ' ';
         }
-        std::cout << std::endl;
+        std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
+        // segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
         end1 = std::chrono::high_resolution_clock::now();
         res = segAlg.maxClique;
 
         time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg mod time: " << time1 << std::endl;
-        std::cout << "Segundo alg mod res: " << res.size() << std::endl;
+        std::cout << "Results: " << res.size() << std::endl;
         for (const auto& vert: res)
         {
             std::cout << vert << ' ';
         }
-        std::cout << std::endl;
+        std::cout << "\n-----------------\n";
+
+        start1 = std::chrono::high_resolution_clock::now();
+        auto resClique = Algorithm<adjMatr_type>::maxCliqueFinding(adjMatr);
+        end1 = std::chrono::high_resolution_clock::now();
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        std::cout << "Custom max clique greedy algorithm time: " << time1 << std::endl;
+        size_t maxCliqueSize{ 0 };
+        std::vector<size_t> maxCLique{};
+        for (const auto& clique: resClique)
+        {
+            if (clique.size() > maxCliqueSize)
+            {
+                maxCliqueSize = clique.size();
+                maxCLique = std::move(clique);
+            }
+        }
+        std::cout << "Results: " << maxCliqueSize << std::endl;
+        std::sort(maxCLique.begin(), maxCLique.end());
+        for (const auto& elem: maxCLique)
+        {
+            std::cout << elem << ' ';
+        }
+        std::cout << "\n-----------------\n";
     }
     catch(std::exception const& e)
     {

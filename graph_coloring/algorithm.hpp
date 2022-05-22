@@ -224,7 +224,6 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
             }
             auto mainBitset = adjMatr.getLine(ind);
             bool flag = true;
-            std::cout << "Into while\n";
             while (flag)
             {
                 size_t maxInPower{};
@@ -252,7 +251,6 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
                         maxOutPower;
                 }
 
-
                 if (maxInPower <= maxOutPower)
                 {
                     vertPowersByVert.erase(iter->second);
@@ -275,11 +273,5 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
             }
         }
         return allMaxCliques;
-    }
-
-    static std::set<size_t> maxCliqueFindingSegundo(std::vector<NeighboursList>& adjMatr)
-    {
-        std::set<size_t> foundMaxClique{};
-        return foundMaxClique;
     }
 };
