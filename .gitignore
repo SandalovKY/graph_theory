@@ -1,3 +1,4 @@
 **/build
 .vscode/
 ssh_sec_key**
+**/files_bin
