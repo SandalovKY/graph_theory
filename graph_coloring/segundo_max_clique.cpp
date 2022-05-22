@@ -8,8 +8,8 @@ void SegundoAlgorithm::runMaxCliqueFinding(std::map<size_t, bitset_type>& adjMat
     std::set<size_t> defSet{};
     if (useModAlgorithm)
     {
-        std::map<size_t, bitset_type> copyMatr = this->coloring_mod_1(adjMatr, 0);
-        this->maxCliqueFindingSegundo_mod_1(adjMatr, copyMatr, defSet);
+        std::map<size_t, bitset_type> copyMatr = this->coloringUsingAdditionalMatrix(adjMatr, 0);
+        this->maxCliqueFindingSegundoUsingAdditionalMatrix(adjMatr, copyMatr, defSet);
     }
     else
     {
@@ -72,7 +72,7 @@ SegundoAlgorithm::index_lines SegundoAlgorithm::coloring(index_lines& adjMatr, i
     return resCols;
 }
 
-SegundoAlgorithm::index_lines SegundoAlgorithm::coloring_mod_1(index_lines& adjMatr, int32_t minCol)
+SegundoAlgorithm::index_lines SegundoAlgorithm::coloringUsingAdditionalMatrix(index_lines& adjMatr, int32_t minCol)
 {
     index_lines resCols{};
 
@@ -137,7 +137,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, bitset_type>& ad
     }
 }
 
-void SegundoAlgorithm::maxCliqueFindingSegundo_mod_1(std::map<size_t, bitset_type>& adjMatr,
+void SegundoAlgorithm::maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<size_t, bitset_type>& adjMatr,
         std::map<size_t, bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique)
 {
     while (!allowedVerts.empty())
@@ -149,12 +149,12 @@ void SegundoAlgorithm::maxCliqueFindingSegundo_mod_1(std::map<size_t, bitset_typ
         {
             currMaxCLique.insert(currLine.first);
             // Get all near verticies that was conjuncted with currLine
-            index_lines nearVerts = this->getNeighbours_mod_1(adjMatr, currLine.second);
+            index_lines nearVerts = this->getNeighboursUsingAdditionalMatrix(adjMatr, currLine.second);
 
             if (!nearVerts.empty())
             {
-                index_lines coloredVerts = this->coloring_mod_1(nearVerts, static_cast<int32_t>(this->maxClique.size() - currMaxCLique.size() + 1));
-                maxCliqueFindingSegundo_mod_1(nearVerts, coloredVerts, currMaxCLique);
+                index_lines coloredVerts = this->coloringUsingAdditionalMatrix(nearVerts, static_cast<int32_t>(this->maxClique.size() - currMaxCLique.size() + 1));
+                maxCliqueFindingSegundoUsingAdditionalMatrix(nearVerts, coloredVerts, currMaxCLique);
             }
             else
             {
@@ -191,7 +191,7 @@ SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighbours(index_lines& adjMa
     return retMap;
 }
 
-SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighbours_mod_1(index_lines& adjMatr, bitset_type& bitset)
+SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighboursUsingAdditionalMatrix(index_lines& adjMatr, bitset_type& bitset)
 {
     index_lines retMap{};
     size_t dimSize = bitset.getDimSize();

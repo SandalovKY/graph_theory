@@ -12,12 +12,13 @@ public:
     std::set<size_t> maxClique{};
     void runMaxCliqueFinding(std::map<size_t, bitset_type>& adjMatr, bool useModAlgorithm = false);
 private:
-    index_lines coloring(index_lines& adjMatr, int32_t minCol);    //
-    index_lines coloring_mod_1(index_lines& adjMatr, int32_t minCol);    //
-    index_lines getNeighbours(index_lines& adjMatr, bitset_type& currBitset);   //
-    index_lines getNeighbours_mod_1(index_lines& adjMatr, bitset_type& currBitset);    //
+    index_lines coloring(index_lines& adjMatr, int32_t minCol);
+    index_lines getNeighbours(index_lines& adjMatr, bitset_type& currBitset);
     void maxCliqueFindingSegundo(std::map<size_t, bitset_type>& adjMatr,
         std::map<size_t, bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique);
-    void maxCliqueFindingSegundo_mod_1(std::map<size_t, bitset_type>& adjMatr,
+
+    index_lines coloringUsingAdditionalMatrix(index_lines& adjMatr, int32_t minCol);
+    index_lines getNeighboursUsingAdditionalMatrix(index_lines& adjMatr, bitset_type& currBitset);
+    void maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<size_t, bitset_type>& adjMatr,
         std::map<size_t, bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique);
 };
