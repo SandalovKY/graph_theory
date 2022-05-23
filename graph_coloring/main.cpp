@@ -45,7 +45,7 @@ int main(int argc, char ** argv) {
 
         SegundoAlgorithm segAlg{};
         auto start1 = std::chrono::high_resolution_clock::now();
-        // segAlg.runMaxCliqueFinding(hmodAdjMatr);
+        segAlg.runMaxCliqueFinding(hmodAdjMatr);
         auto end1 = std::chrono::high_resolution_clock::now();
         auto& res = segAlg.maxClique;
 
@@ -59,7 +59,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        // segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
+        segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
         end1 = std::chrono::high_resolution_clock::now();
         res = segAlg.maxClique;
 

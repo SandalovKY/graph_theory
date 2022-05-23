@@ -2,7 +2,7 @@
 #include <map>
 #include "segundo_max_clique.hpp"
 
-void SegundoAlgorithm::runMaxCliqueFinding(std::map<size_t, bitset_type>& adjMatr, bool useModAlgorithm)
+void SegundoAlgorithm::runMaxCliqueFinding(std::map<size_t, bitset_type> adjMatr, bool useModAlgorithm)
 {
     this->maxClique.clear();
     std::set<size_t> defSet{};
@@ -119,6 +119,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, bitset_type>& ad
         {
             currMaxCLique.insert(currLine.first);
             // Get all near verticies that was conjuncted with currLine
+            adjMatr.erase(currLine.first);
             index_lines nearVerts = this->getNeighbours(adjMatr, currLine.second);
             if (!nearVerts.empty())
             {
@@ -149,6 +150,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<siz
         {
             currMaxCLique.insert(currLine.first);
             // Get all near verticies that was conjuncted with currLine
+            adjMatr.erase(currLine.first);
             index_lines nearVerts = this->getNeighboursUsingAdditionalMatrix(adjMatr, currLine.second);
 
             if (!nearVerts.empty())

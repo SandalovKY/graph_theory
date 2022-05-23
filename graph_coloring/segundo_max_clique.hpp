@@ -10,7 +10,7 @@ public:
     using bitset_type = myDynamicBitset<>;
     using index_lines = std::map<size_t, bitset_type>;
     std::set<size_t> maxClique{};
-    void runMaxCliqueFinding(std::map<size_t, bitset_type>& adjMatr, bool useModAlgorithm = false);
+    void runMaxCliqueFinding(std::map<size_t, bitset_type> adjMatr, bool useModAlgorithm = false);
 private:
     index_lines coloring(index_lines& adjMatr, int32_t minCol);
     index_lines getNeighbours(index_lines& adjMatr, bitset_type& currBitset);
