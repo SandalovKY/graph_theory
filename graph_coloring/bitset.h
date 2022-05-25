@@ -126,6 +126,26 @@ public:
         return true;
     }
 
+    bool isEmpty()
+    {
+        bool isEmpty{ true };
+        size_t numBlocks{ m_block_vector.size() };
+        size_t ind{ 0 };
+        while (isEmpty && ind < numBlocks)
+        {
+            isEmpty &= m_block_vector[ind] == 0;
+        }
+        return isEmpty;
+    }
+
+    void all2one()
+    {
+        for (size_t ind = 0; ind < m_block_num; ++ind)
+        {
+            m_block_vector[ind] = -1;
+        }
+    }
+
     m_bit_position_type num_blocks() const
     {
         return m_block_num;

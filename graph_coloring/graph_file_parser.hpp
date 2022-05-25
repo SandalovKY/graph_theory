@@ -167,49 +167,158 @@ ReadJsonGraphToAdjList(json::value const& jv)
     return my::ColoredGraph();
 }
 
-template <typename ListType>
-typename my::BitAdjacencyMatrix<ListType>
-ReadDimacsGraphToAdjMatr(char const* filename)
+class myParser
 {
-    std::ifstream inputFile(filename);
-    // inputFile.open();
-    if (inputFile.is_open())
+public:
+    using ReorderingMap = std::map<size_t, size_t>;
+    myParser(char const* filename)
     {
-        std::cout << "Opened file\n";
-        size_t fileSize{ 0 };
-        std::string line;
-        std::getline(inputFile, line);
-        std::vector<std::string> parsedLine;
-        boost::split(parsedLine, line, [](char c){ return c == ' '; });
-
-        while (parsedLine[0] != "p")
+        std::ifstream inputFile(filename);
+        if (inputFile.is_open())
         {
+            size_t fileSize{ 0 };
+            std::string line;
+            std::getline(inputFile, line);
+            std::vector<std::string> parsedLine;
+            boost::split(parsedLine, line, [](char c){ return c == ' '; });
+
+            while (parsedLine[0] != "p")
+            {
+                std::getline(inputFile, line);
+                boost::split(parsedLine, line, [](char c){ return c == ' '; });
+            }
+
+            if (parsedLine.size() < 4) return;
+            m_vertexNum = std::stoi(parsedLine[2]);
+            m_edgesNum = std::stoi(parsedLine[3]);
+            
             std::getline(inputFile, line);
             boost::split(parsedLine, line, [](char c){ return c == ' '; });
+
+            while (parsedLine[0] != "e")
+            {
+                std::getline(inputFile, line);
+                boost::split(parsedLine, line, [](char c){ return c == ' '; });
+            }
+
+            while (parsedLine[0] == "e")
+            {
+                size_t v_first{ static_cast<size_t>(std::stoi(parsedLine[1])) };
+                size_t v_second{ static_cast<size_t>(std::stoi(parsedLine[2])) };
+
+                auto findRes = std::find_if(std::begin(m_list), std::end(m_list), [v_first](std::pair<size_t, std::set<size_t>>& element){
+                    return element.first == v_first - 1;
+                });
+                if (findRes != std::end(m_list))
+                {
+                    findRes->second.insert(v_second - 1);
+                }
+                else
+                {
+                    m_list.push_back({ v_first - 1, std::set<size_t>{ v_second - 1 } });
+                }
+
+                findRes = std::find_if(std::begin(m_list), std::end(m_list), [v_second](std::pair<size_t, std::set<size_t>>& element){
+                    return element.first == v_second - 1;
+                });
+                if (findRes != std::end(m_list))
+                {
+                    findRes->second.insert(v_first - 1);
+                }
+                else
+                {
+                    m_list.push_back({ v_second - 1, std::set<size_t>{ v_first - 1 } });
+                }
+
+                std::getline(inputFile, line);
+                boost::split(parsedLine, line, [](char c){ return c == ' '; });
+            }
         }
+    }
 
-        if (parsedLine.size() < 4) return my::BitAdjacencyMatrix<ListType>{};
-        my::BitAdjacencyMatrix<ListType> adjMatrRet{ static_cast<typename my::BitAdjacencyMatrix<ListType>::m_vertex_num_type>(std::stoi(parsedLine[2])),
-            static_cast<typename my::BitAdjacencyMatrix<ListType>::m_edges_num_type>(std::stoi(parsedLine[3])) };
-
-        std::getline(inputFile, line);
-        boost::split(parsedLine, line, [](char c){ return c == ' '; });
-
-        while (parsedLine[0] == "e")
+    template <typename ListType>
+    typename my::BitAdjacencyMatrix<ListType>
+    adjList2adjMatr(ReorderingMap* map2Reorder = nullptr)
+    {
+        my::BitAdjacencyMatrix<ListType> adjMatrRet{ static_cast<typename my::BitAdjacencyMatrix<ListType>::m_vertex_num_type>(m_vertexNum),
+            static_cast<typename my::BitAdjacencyMatrix<ListType>::m_edges_num_type>(m_edgesNum) };
+        
+        if (map2Reorder != nullptr)
         {
-            size_t v_first{ static_cast<size_t>(std::stoi(parsedLine[1])) };
-            size_t v_second{ static_cast<size_t>(std::stoi(parsedLine[2])) };
-            adjMatrRet[v_first - 1].set(v_second - 1);
-            adjMatrRet[v_second - 1].set(v_first - 1);
-            std::getline(inputFile, line);
-            boost::split(parsedLine, line, [](char c){ return c == ' '; });
+            for (auto& vertex: m_list)
+            {
+                for(const auto& adjacent: vertex.second)
+                {
+                    adjMatrRet[(*map2Reorder)[vertex.first]].set((*map2Reorder)[adjacent]);
+                }
+            }
+        }
+        else
+        {
+            for (const auto& vertex: m_list)
+            {
+                for(const auto& adjacent: vertex.second)
+                {
+                    adjMatrRet[vertex.first].set(adjacent);
+                }
+            }
         }
 
         return adjMatrRet;
     }
-    std::cout << "Error while file reading" << std::endl;
-    return my::BitAdjacencyMatrix<ListType>{};
-}
+
+    typename std::map<size_t, myDynamicBitset<>>
+    adjList2adjMatrMap(ReorderingMap* map2Reorder = nullptr)
+    {
+        std::map<size_t, myDynamicBitset<>> retMap{};
+        size_t numBits = m_list.size();
+        if (map2Reorder != nullptr)
+        {
+            for (auto& vertex: m_list)
+            {
+                size_t currVertId{ (*map2Reorder)[vertex.first] };
+                retMap.insert({ currVertId, myDynamicBitset<>(numBits, currVertId) });
+                for(const auto& adjacent: vertex.second)
+                {
+                    retMap[currVertId].set((*map2Reorder)[adjacent]);
+                }
+            }
+        }
+        else
+        {
+            for (const auto& vertex: m_list)
+            {
+                size_t currVertId = vertex.first;
+                retMap.insert({ currVertId, myDynamicBitset<>(numBits, currVertId) });
+                for(const auto& adjacent: vertex.second)
+                {
+                    retMap[currVertId].set(adjacent);
+                }
+            }
+        }
+        return retMap;
+    }
+
+    ReorderingMap getMaxCliqueReordering()
+    {
+        ReorderingMap retMap{};
+
+        std::sort(m_list.begin(), m_list.end(), [](std::pair<size_t, std::set<size_t>>& element1, std::pair<size_t, std::set<size_t>>& element2){
+            return element1.second.size() > element2.second.size();
+        });
+
+        for (size_t ind = 0;ind < m_list.size(); ++ind)
+        {
+            retMap[m_list[ind].first] = ind;
+        }
+        return retMap;
+    }
+private:
+    using AdjList = std::vector<std::pair<size_t, std::set<size_t>>>;
+    AdjList m_list{};
+    size_t m_vertexNum{};
+    size_t m_edgesNum{};
+};
 
 std::vector<std::vector<size_t>>
 ReadDimacsGraphToVector(char const* filename)

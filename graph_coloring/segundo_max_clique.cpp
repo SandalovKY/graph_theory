@@ -2,8 +2,11 @@
 #include <map>
 #include "segundo_max_clique.hpp"
 
+int32_t step_count{ 0 };
+
 void SegundoAlgorithm::runMaxCliqueFinding(std::map<size_t, bitset_type> adjMatr, bool useModAlgorithm)
 {
+    step_count = 0;
     this->maxClique.clear();
     std::set<size_t> defSet{};
     if (useModAlgorithm)
@@ -22,6 +25,23 @@ void SegundoAlgorithm::runMaxCliqueFinding(std::map<size_t, bitset_type> adjMatr
         std::map<size_t, bitset_type> coloredMatr = this->coloring(copyMatr, 0);
         this->maxCliqueFindingSegundo(adjMatr, coloredMatr, defSet);
     }
+    std::cout << "Num steps: " << step_count << std::endl;
+}
+
+void SegundoAlgorithm::runTestAlgorithm()
+{
+    step_count = 0;
+    size_t numBits{ 0 };
+    if (!this->globalAdjMatr.empty())
+    {
+        numBits = this->globalAdjMatr.begin()->second.getDimSize();
+    }
+    bitset_type inputVerts(numBits, -1);
+    bitset_type currMaxClique(numBits, -1);
+    inputVerts.all2one();
+    index_lines copyMatr = this->coloringUsingAdditionalMatrix(this->globalAdjMatr, 0);
+    this->maxCliqueSegTest(inputVerts, copyMatr, currMaxClique);
+    std::cout << "Num steps: " << step_count << std::endl;
 }
 
 SegundoAlgorithm::index_lines SegundoAlgorithm::coloring(index_lines& adjMatr, int32_t minCol)
@@ -107,13 +127,67 @@ SegundoAlgorithm::index_lines SegundoAlgorithm::coloringUsingAdditionalMatrix(in
     return resCols;
 }
 
+SegundoAlgorithm::SegundoAlgorithm(const index_lines& adjMatr)
+    : globalAdjMatr(adjMatr)
+{
+    if (!globalAdjMatr.empty())
+    {
+        this->globalMaxClique = bitset_type(globalAdjMatr.begin()->second.getDimSize(), -1);
+    }
+}
+
+void SegundoAlgorithm::maxCliqueSegTest(bitset_type searchSubgraph, index_lines& allowedVerts, bitset_type& currMaxClique)
+{
+    ++step_count;
+    while (!allowedVerts.empty())
+    {
+        auto currLine = *(--allowedVerts.end());
+
+        size_t lineInd = currLine.first;
+
+        allowedVerts.erase(lineInd);
+
+        int32_t currCliqueSize = countSetBits(currMaxClique);
+        int32_t maxCliqueSize = countSetBits(this->globalMaxClique);
+
+        if (currCliqueSize + currLine.second.getColor() > maxCliqueSize)
+        {
+            searchSubgraph.unset(lineInd);
+            currMaxClique.set(lineInd);
+            ++currCliqueSize;
+
+            bitset_type& line = currLine.second;
+
+            line &= searchSubgraph;
+
+            index_lines nearVerts = this->getNeighboursTest(line);
+            if (!nearVerts.empty())
+            {
+                index_lines coloredVerts = this->coloringUsingAdditionalMatrix(nearVerts, maxCliqueSize - currCliqueSize + 1);
+                this->maxCliqueSegTest(line, coloredVerts, currMaxClique);
+            }
+            else
+            {
+                if (currCliqueSize > maxCliqueSize)
+                {
+                    this->globalMaxClique = currMaxClique;
+                }
+            }
+            currMaxClique.unset(lineInd);
+            --currCliqueSize;
+        }
+    }
+}
+
 void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, bitset_type>& adjMatr,
     std::map<size_t, bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique)
 {
+    ++step_count;
     while (!allowedVerts.empty())
     {
         auto currLine = *(--allowedVerts.end());
         allowedVerts.erase(currLine.first);
+        // adjMatr.erase(currLine.first);
         
         if (currMaxCLique.size() + currLine.second.getColor() > this->maxClique.size())
         {
@@ -141,10 +215,12 @@ void SegundoAlgorithm::maxCliqueFindingSegundo(std::map<size_t, bitset_type>& ad
 void SegundoAlgorithm::maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<size_t, bitset_type>& adjMatr,
         std::map<size_t, bitset_type>& allowedVerts, std::set<size_t>& currMaxCLique)
 {
+    ++step_count;
     while (!allowedVerts.empty())
     {
         auto currLine = *(--allowedVerts.end());
         allowedVerts.erase(currLine.first);
+        // adjMatr.erase(currLine.first);
         
         if (currMaxCLique.size() + currLine.second.getColor() > this->maxClique.size())
         {
@@ -212,4 +288,24 @@ SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighboursUsingAdditionalMatr
         firstSetBitPos = localBitset.getFirstNonZeroPosition();
     }
     return retMap;
+}
+
+SegundoAlgorithm::index_lines SegundoAlgorithm::getNeighboursTest(bitset_type& currBitset)
+{
+    index_lines retVerticies{};
+    size_t dimSize = currBitset.getDimSize();
+    bitset_type localBitset = currBitset;
+    size_t firstSetBitPos = localBitset.getFirstNonZeroPosition();
+    while (firstSetBitPos < dimSize)
+    {
+        if (this->globalAdjMatr.contains(firstSetBitPos))
+        {
+            bitset_type line = this->globalAdjMatr[firstSetBitPos];
+            line &= currBitset;
+            retVerticies.insert({ firstSetBitPos, std::move(line) });
+        }
+        localBitset.unset(firstSetBitPos);
+        firstSetBitPos = localBitset.getFirstNonZeroPosition();
+    }
+    return retVerticies;
 }

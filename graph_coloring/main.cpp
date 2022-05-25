@@ -9,6 +9,20 @@
 #include <chrono>
 #include <fstream>
 
+std::set<size_t> getSetBits(SegundoAlgorithm::bitset_type bitset)
+{
+    std::set<size_t> retSet{};
+    size_t dimSize = bitset.getDimSize();
+    size_t firstSetBit = bitset.getFirstNonZeroPosition();
+    while (firstSetBit < dimSize)
+    {
+        retSet.insert(firstSetBit);
+        bitset.unset(firstSetBit);
+        firstSetBit = bitset.getFirstNonZeroPosition();
+    }
+    return retSet;
+}
+
 int main(int argc, char ** argv) {
     if(argc != 2)
     {
@@ -20,13 +34,25 @@ int main(int argc, char ** argv) {
 
     using bitset_type = myDynamicBitset<>;
     using adjMatr_type = my::BitAdjacencyMatrix<bitset_type>; 
+    using adjMatrMap_type = std::map<size_t, myDynamicBitset<>>;
     adjMatr_type adjMatr;
+    adjMatr_type reordered;
+
+    adjMatrMap_type usualOrderMap{};
+    adjMatrMap_type reorderedMap{};
     // adjMatr_type myTestMatr;
     try
     {
         std::cout << "Start to input col graph files\n";
-        adjMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>(argv[1]);
-        // myTestMatr = my_parser::ReadDimacsGraphToAdjMatr<bitset_type>("../files/matr.col");
+        my_parser::myParser graphParser(argv[1]);
+
+        auto reordering = graphParser.getMaxCliqueReordering();
+
+        adjMatr = graphParser.adjList2adjMatr<bitset_type>(&reordering);
+
+        usualOrderMap = graphParser.adjList2adjMatrMap();
+        reorderedMap = graphParser.adjList2adjMatrMap(&reordering);
+
         std::cout << "Finished files reading\n";
 
         size_t adjMatrDimSize = adjMatr.getMatrDimSize();
@@ -43,9 +69,12 @@ int main(int argc, char ** argv) {
             tmp.setId(ind);
         }
 
-        SegundoAlgorithm segAlg{};
+
+
+        SegundoAlgorithm segAlg(usualOrderMap);
+        SegundoAlgorithm segAlgReordered(reorderedMap);
         auto start1 = std::chrono::high_resolution_clock::now();
-        segAlg.runMaxCliqueFinding(hmodAdjMatr);
+        // segAlg.runMaxCliqueFinding(hmodAdjMatr);
         auto end1 = std::chrono::high_resolution_clock::now();
         auto& res = segAlg.maxClique;
 
@@ -59,7 +88,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
+        // segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
         end1 = std::chrono::high_resolution_clock::now();
         res = segAlg.maxClique;
 
@@ -69,6 +98,36 @@ int main(int argc, char ** argv) {
         for (const auto& vert: res)
         {
             std::cout << vert << ' ';
+        }
+        std::cout << "\n-----------------\n";
+
+        start1 = std::chrono::high_resolution_clock::now();
+        segAlg.runTestAlgorithm();
+        end1 = std::chrono::high_resolution_clock::now();
+        auto resTest = segAlg.globalMaxClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        std::cout << "Seg alg test time: " << time1 << std::endl;
+        std::cout << "Results: " << countSetBits(resTest) << std::endl;
+        auto resultsBits = getSetBits(resTest);
+        for (const auto& el: resultsBits)
+        {
+            std::cout << el << ' ';
+        }
+        std::cout << "\n-----------------\n";
+
+        start1 = std::chrono::high_resolution_clock::now();
+        segAlgReordered.runTestAlgorithm();
+        end1 = std::chrono::high_resolution_clock::now();
+        auto resTestReordered = segAlgReordered.globalMaxClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        std::cout << "Seg alg test reorsered time: " << time1 << std::endl;
+        std::cout << "Results: " << countSetBits(resTestReordered) << std::endl;
+        auto resultsBitsReordered = getSetBits(resTestReordered);
+        for (const auto& el: resultsBitsReordered)
+        {
+            std::cout << el << ' ';
         }
         std::cout << "\n-----------------\n";
 
