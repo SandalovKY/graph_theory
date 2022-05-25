@@ -9,8 +9,6 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/dynamic_bitset.hpp>
 
-namespace my
-{
 
 // Graph properties
 struct ProcessInfo
@@ -125,5 +123,3 @@ public:
     void setEdgesNum(size_t edgesNum) { m_edges_num = edgesNum; }
     ~BitAdjacencyMatrix() = default;
 };
-
-} // namsepace my

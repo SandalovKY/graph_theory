@@ -1,6 +1,6 @@
-#include <set>
-#include <map>
 #include "segundo_max_clique.hpp"
+
+#include <iostream>
 
 int32_t step_count{ 0 };
 

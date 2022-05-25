@@ -2,7 +2,7 @@
 
 #include <set>
 #include <map>
-#include "bitset.h"
+#include "bitset.hpp"
 
 class SegundoAlgorithm
 {

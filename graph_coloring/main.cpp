@@ -1,7 +1,7 @@
 #include "graph.hpp"
 #include "algorithm.hpp"
 #include "segundo_max_clique.hpp"
-#include "graph_file_parser.hpp"
+#include "parser.hpp"
 #include <iostream>
 #include <map>
 #include <utility>
@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
     }
 
     using bitset_type = myDynamicBitset<>;
-    using adjMatr_type = my::BitAdjacencyMatrix<bitset_type>; 
+    using adjMatr_type = BitAdjacencyMatrix<bitset_type>; 
     using adjMatrMap_type = std::map<size_t, myDynamicBitset<>>;
     adjMatr_type adjMatr;
     adjMatr_type reordered;
@@ -44,7 +44,7 @@ int main(int argc, char ** argv) {
     try
     {
         std::cout << "Start to input col graph files\n";
-        my_parser::myParser graphParser(argv[1]);
+        Parser graphParser(argv[1]);
 
         auto reordering = graphParser.getMaxCliqueReordering();
 
@@ -102,7 +102,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlg.runTestAlgorithm();
+        // segAlg.runTestAlgorithm();
         end1 = std::chrono::high_resolution_clock::now();
         auto resTest = segAlg.globalMaxClique;
 

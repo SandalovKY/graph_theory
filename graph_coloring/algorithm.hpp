@@ -2,15 +2,17 @@
 
 #include "graph.hpp"
 #include "ant_colony.hpp"
+
 #include <iostream>
 #include <set>
 #include <unordered_map>
+
 
 template<typename Graph>
 struct Algorithm
 {
     size_t m_maxIter = 1;
-    my::AntColony m_colony;
+    AntColony m_colony;
     Algorithm(Graph& graph, size_t numAnts = 10, size_t maxIter = 1500) : m_colony(graph, numAnts), m_maxIter(maxIter) {}
 
     void coloring()
@@ -20,9 +22,9 @@ struct Algorithm
 };
 
 template<typename NeighboursList>
-struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
+struct Algorithm<BitAdjacencyMatrix<NeighboursList>>
 {
-    static std::vector<std::vector<uint16_t>> coloring(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
+    static std::vector<std::vector<uint16_t>> coloring(BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
         std::vector<std::vector<uint16_t>> resColors{};
         size_t color_pos{ 0 };
@@ -66,7 +68,7 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
         return resColors;
     }
 
-    static size_t maxCliqueFinding1(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
+    static size_t maxCliqueFinding1(BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
         size_t max_clique_size{ 0 };
         size_t dimSize = adjMatr.getMatrDimSize();
@@ -123,7 +125,7 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
         return max_clique_size;
     }
 
-    static std::vector<std::vector<size_t>> maxCliqueFinding(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
+    static std::vector<std::vector<size_t>> maxCliqueFinding(BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
         std::vector<std::vector<size_t>> allMaxCliques{};
         size_t dimSize = adjMatr.getMatrDimSize();
@@ -193,7 +195,7 @@ struct Algorithm<my::BitAdjacencyMatrix<NeighboursList>>
         return allMaxCliques;
     }
 
-    static std::vector<std::set<size_t>> maxCliqueFinding2(my::BitAdjacencyMatrix<NeighboursList>& adjMatr)
+    static std::vector<std::set<size_t>> maxCliqueFinding2(BitAdjacencyMatrix<NeighboursList>& adjMatr)
     {
         std::vector<std::set<size_t>> allMaxCliques{};
         size_t dimSize = adjMatr.getMatrDimSize();
