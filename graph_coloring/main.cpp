@@ -74,9 +74,9 @@ int main(int argc, char ** argv) {
         SegundoAlgorithm segAlg(usualOrderMap);
         SegundoAlgorithm segAlgReordered(reorderedMap);
         auto start1 = std::chrono::high_resolution_clock::now();
-        // segAlg.runMaxCliqueFinding(hmodAdjMatr);
+        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::ReferenceWithInputBitset);
         auto end1 = std::chrono::high_resolution_clock::now();
-        auto& res = segAlg.maxClique;
+        auto& res = segAlgReordered.maxClique;
 
         auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg time: " << time1 << std::endl;
@@ -88,9 +88,9 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        // segAlg.runMaxCliqueFinding(hmodAdjMatr, true);
+        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
         end1 = std::chrono::high_resolution_clock::now();
-        res = segAlg.maxClique;
+        res = segAlgReordered.maxClique;
 
         time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg mod time: " << time1 << std::endl;
@@ -102,22 +102,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        // segAlg.runTestAlgorithm();
-        end1 = std::chrono::high_resolution_clock::now();
-        auto resTest = segAlg.globalMaxClique;
-
-        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        std::cout << "Seg alg test time: " << time1 << std::endl;
-        std::cout << "Results: " << countSetBits(resTest) << std::endl;
-        auto resultsBits = getSetBits(resTest);
-        for (const auto& el: resultsBits)
-        {
-            std::cout << el << ' ';
-        }
-        std::cout << "\n-----------------\n";
-
-        start1 = std::chrono::high_resolution_clock::now();
-        segAlgReordered.runTestAlgorithm();
+        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::ModifiedWithInputBitset);
         end1 = std::chrono::high_resolution_clock::now();
         auto resTestReordered = segAlgReordered.globalMaxClique;
 
