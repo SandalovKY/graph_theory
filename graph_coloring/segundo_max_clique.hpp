@@ -10,6 +10,7 @@ public:
     using bitset_type = myDynamicBitset<>;
     using index_lines = std::map<size_t, bitset_type>;
     using index_lines_with_order = std::vector<bitset_type>;
+    using index_lines_with_order_mm = std::multimap<size_t, bitset_type>;
     enum Algorithms
     {
         Reference,

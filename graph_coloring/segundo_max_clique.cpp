@@ -22,6 +22,7 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms alg)
     index_lines copyMatr = this->globalAdjMatr;
     index_lines allowedMatr = this->globalAdjMatr;
     index_lines_with_order coloredMatr{};
+    // index_lines_with_order coloredMap{};
 
     bitset_type inputVerts(numBits, -1);
     bitset_type currMaxClique(numBits, -1);
@@ -102,6 +103,7 @@ SegundoAlgorithm::index_lines_with_order SegundoAlgorithm::coloring(index_lines&
 SegundoAlgorithm::index_lines_with_order SegundoAlgorithm::coloringUsingAdditionalMatrix(index_lines& adjMatr, int32_t minCol)
 {
     index_lines_with_order resCols{};
+    // index_lines_with_order_mm resColsMap{};
 
     size_t numBits{ 0 };
     if (!adjMatr.empty())
@@ -127,11 +129,10 @@ SegundoAlgorithm::index_lines_with_order SegundoAlgorithm::coloringUsingAddition
         tabuCols[color] |= recordVal;
         if (color + 1 >= minCol)
         {
-            // resCols.insert({ recordInd, recordVal });
+            // resColsMap.insert({ color + 1, recordVal });
             resCols.push_back(recordVal);
         }
     }
-
     return resCols;
 }
 
@@ -144,6 +145,8 @@ void SegundoAlgorithm::maxCliqueSegTest(bitset_type searchSubgraph, index_lines_
         // auto currLine = *(--allowedVerts.end());
         size_t lineInd = currLine.getId();
 
+        // allowedVerts.erase((--allowedVerts.end()));
+        // searchSubgraph.unset(lineInd);
         allowedVerts.pop_back();
 
         int32_t currCliqueSize = countSetBits(currMaxClique);
@@ -175,6 +178,7 @@ void SegundoAlgorithm::maxCliqueSegTest(bitset_type searchSubgraph, index_lines_
             currMaxClique.unset(lineInd);
             --currCliqueSize;
         }
+        // else break;
     }
 }
 
@@ -226,14 +230,16 @@ void SegundoAlgorithm::maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<siz
         auto currLine = allowedVerts.back();
         // auto currLine = *(--allowedVerts.end());
         size_t currLineInd = currLine.getId();
+        
+        // allowedVerts.erase((--allowedVerts.end()));
+        // adjMatr.erase(currLineInd);
         allowedVerts.pop_back();
-        adjMatr.erase(currLineInd);
         
         if (currMaxCLique.size() + currLine.getColor() > this->maxClique.size())
         {
             currMaxCLique.insert(currLineInd);
             // Get all near verticies that was conjuncted with currLine
-            // adjMatr.erase(currLine.first);
+            adjMatr.erase(currLineInd);
             index_lines nearVerts = this->getNeighbours(adjMatr, currLine);
 
             if (!nearVerts.empty())
@@ -250,6 +256,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<siz
             }
             currMaxCLique.erase(currLineInd);
         }
+        // else break;
     }
 }
 
