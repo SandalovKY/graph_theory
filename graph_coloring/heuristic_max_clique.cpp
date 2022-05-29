@@ -80,6 +80,5 @@ std::set<size_t> maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> a
             maxCliqueVector = clique;
         }
     }
-
     return std::set<size_t>(maxCliqueVector.begin(), maxCliqueVector.end());
 }

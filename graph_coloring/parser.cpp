@@ -233,5 +233,3 @@ Parser::ReorderingMap Parser::getCoreNumsMaxCliqueReordering()
     }
     return retMap;
 }
-
-
