@@ -46,11 +46,12 @@ int main(int argc, char ** argv) {
         std::cout << "Start to input col graph files\n";
         Parser graphParser(argv[1]);
 
-        auto reordering = graphParser.getMaxCliqueReordering();
+        auto reordering = graphParser.getSimpleMaxCliqueReordering();
+        // auto reordering = graphParser.getCoreNumsMaxCliqueReordering();
 
         adjMatr = graphParser.adjList2adjMatr<bitset_type>(&reordering);
 
-        usualOrderMap = graphParser.adjList2adjMatrMap();
+        // reorderedMap = graphParser.adjList2adjMatrMap();
         reorderedMap = graphParser.adjList2adjMatrMap(&reordering);
 
         std::cout << "Finished files reading\n";
@@ -74,7 +75,7 @@ int main(int argc, char ** argv) {
         SegundoAlgorithm segAlg(usualOrderMap);
         SegundoAlgorithm segAlgReordered(reorderedMap);
         auto start1 = std::chrono::high_resolution_clock::now();
-        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::ReferenceWithInputBitset);
+        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
         auto end1 = std::chrono::high_resolution_clock::now();
         auto& res = segAlgReordered.maxClique;
 
@@ -88,12 +89,12 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
+        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
         end1 = std::chrono::high_resolution_clock::now();
         res = segAlgReordered.maxClique;
 
         time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        std::cout << "Seg alg mod time: " << time1 << std::endl;
+        std::cout << "Seg alg boosted time: " << time1 << std::endl;
         std::cout << "Results: " << res.size() << std::endl;
         for (const auto& vert: res)
         {
@@ -101,20 +102,34 @@ int main(int argc, char ** argv) {
         }
         std::cout << "\n-----------------\n";
 
-        start1 = std::chrono::high_resolution_clock::now();
-        segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::ModifiedWithInputBitset);
-        end1 = std::chrono::high_resolution_clock::now();
-        auto resTestReordered = segAlgReordered.globalMaxClique;
+        // start1 = std::chrono::high_resolution_clock::now();
+        // segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
+        // end1 = std::chrono::high_resolution_clock::now();
+        // res = segAlgReordered.maxClique;
 
-        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        std::cout << "Seg alg test reorsered time: " << time1 << std::endl;
-        std::cout << "Results: " << countSetBits(resTestReordered) << std::endl;
-        auto resultsBitsReordered = getSetBits(resTestReordered);
-        for (const auto& el: resultsBitsReordered)
-        {
-            std::cout << el << ' ';
-        }
-        std::cout << "\n-----------------\n";
+        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        // std::cout << "Seg alg mod time: " << time1 << std::endl;
+        // std::cout << "Results: " << res.size() << std::endl;
+        // for (const auto& vert: res)
+        // {
+        //     std::cout << vert << ' ';
+        // }
+        // std::cout << "\n-----------------\n";
+
+        // start1 = std::chrono::high_resolution_clock::now();
+        // segAlgReordered.runTestAlgorithm(SegundoAlgorithm::Algorithms::ModifiedWithInputBitset);
+        // end1 = std::chrono::high_resolution_clock::now();
+        // auto resTestReordered = segAlgReordered.globalMaxClique;
+
+        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        // std::cout << "Seg alg test reorsered time: " << time1 << std::endl;
+        // std::cout << "Results: " << countSetBits(resTestReordered) << std::endl;
+        // auto resultsBitsReordered = getSetBits(resTestReordered);
+        // for (const auto& el: resultsBitsReordered)
+        // {
+        //     std::cout << el << ' ';
+        // }
+        // std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
         auto resClique = Algorithm<adjMatr_type>::maxCliqueFinding(adjMatr);

@@ -50,7 +50,8 @@ public:
     typename std::map<size_t, myDynamicBitset<>>
     adjList2adjMatrMap(ReorderingMap* map2Reorder = nullptr);
 
-    ReorderingMap getMaxCliqueReordering();
+    ReorderingMap getSimpleMaxCliqueReordering();
+    ReorderingMap getCoreNumsMaxCliqueReordering();
 private:
     AdjList m_list{};
     size_t m_vertexNum{};

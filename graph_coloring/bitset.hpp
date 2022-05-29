@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <stdexcept>
+#include <set>
 
 template <typename BlockType = uint64_t>
 class myDynamicBitset

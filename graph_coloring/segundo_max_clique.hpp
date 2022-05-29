@@ -16,7 +16,9 @@ public:
         Reference,
         ReferenceWithInputBitset,
         Modified,
-        ModifiedWithInputBitset
+        ModifiedWithInputBitset,
+        BoostedReferenceAlgorithm,
+        BoostedModifiedAlgorithm
     };
     std::set<size_t> maxClique{};
 

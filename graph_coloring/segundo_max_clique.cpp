@@ -1,4 +1,5 @@
 #include "segundo_max_clique.hpp"
+#include "heuristic_max_clique.hpp"
 
 #include <iostream>
 
@@ -30,10 +31,14 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms alg)
 
     switch (alg)
     {
-    case Algorithms::ReferenceWithInputBitset:
+    case Algorithms::BoostedReferenceAlgorithm:
+        this->maxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
+    case Algorithms::Reference:
         coloredMatr = this->coloring(allowedMatr, 3);
         this->maxCliqueFindingSegundoReference(inputVerts, coloredMatr, defSet);
         break;
+    case Algorithms::BoostedModifiedAlgorithm:
+        this->maxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
     case Algorithms::Modified:
         coloredMatr = this->coloringUsingAdditionalMatrix(allowedMatr, 3);
         this->maxCliqueFindingSegundoUsingAdditionalMatrix(copyMatr, coloredMatr, defSet);
