@@ -1,4 +1,4 @@
-# graph_theory
+# Graph Theory
 ## Graph coloring algorithms
 1) Greedy algorithm on bitsets
 2) Ant Colony algorithm
