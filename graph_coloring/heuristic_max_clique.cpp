@@ -1,8 +1,9 @@
 #include "heuristic_max_clique.hpp"
 
 
-std::set<size_t> maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> adjMatr)
+SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> adjMatr)
 {
+    SegundoAlgorithm::bitset_type retBitset{};
     std::vector<std::vector<size_t>> allMaxCliques{};
     size_t dimSize = adjMatr.begin()->second.getDimSize();
 
@@ -80,5 +81,9 @@ std::set<size_t> maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> a
             maxCliqueVector = clique;
         }
     }
-    return std::set<size_t>(maxCliqueVector.begin(), maxCliqueVector.end());
+    for (const auto& vert: maxCliqueVector)
+    {
+        retBitset.set(vert);
+    }
+    return retBitset;
 }

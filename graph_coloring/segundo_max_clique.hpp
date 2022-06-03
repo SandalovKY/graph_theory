@@ -20,27 +20,25 @@ public:
         BoostedReferenceAlgorithm,
         BoostedModifiedAlgorithm
     };
-    std::set<size_t> maxClique{};
 
     bitset_type globalMaxClique{};
     index_lines globalAdjMatr{};
 
     SegundoAlgorithm(index_lines adjMatr);
-
     void runTestAlgorithm(Algorithms alg);
 private:
-    index_lines_with_order coloring(index_lines& adjMatr, int32_t minCol);
-    index_lines_with_order coloringUsingAdditionalMatrix(index_lines& adjMatr, int32_t minCol);
-    index_lines getNeighbours(index_lines& adjMatr, bitset_type& currBitset);
-    index_lines getNeighboursBitsetInput(bitset_type& currBitset);
+    std::vector<std::pair<size_t, size_t>> coloring(const std::set<size_t>& adjMatr, int32_t minCol, const bitset_type& currVerts);
+    // index_lines_with_order coloringUsingAdditionalMatrix(index_lines& adjMatr, int32_t minCol);
+    // index_lines getNeighbours(index_lines& adjMatr, bitset_type& currBitset);
+    // index_lines getNeighboursBitsetInput(bitset_type& currBitset);
 
-    void maxCliqueFindingSegundo(std::map<size_t, bitset_type>& adjMatr,
-        index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
-    void maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<size_t, bitset_type>& adjMatr,
-        index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
+    // void maxCliqueFindingSegundo(std::map<size_t, bitset_type>& adjMatr,
+    //     index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
+    // void maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<size_t, bitset_type>& adjMatr,
+        // index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
     void maxCliqueSegTest(bitset_type searchSubgraph, std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique);
     void maxCliqueFindingSegundoReference(bitset_type searchSubgraph,
-    index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
+    std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique);
 
     std::vector<std::pair<size_t, size_t>> retColoring(const std::set<size_t>& currVerts, int32_t minCol);
 };

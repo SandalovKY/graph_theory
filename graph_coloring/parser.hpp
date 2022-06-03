@@ -52,7 +52,8 @@ public:
 
     ReorderingMap getSimpleMaxCliqueReordering();
     ReorderingMap getCoreNumsMaxCliqueReordering();
-    ReorderingMap test();
+    ReorderingMap getCoreNumsMaxCliqueReorderingMod();
+    std::set<size_t> getDefaultOrder(ReorderingMap& reorderingMap, std::set<size_t>& srcSet);
 private:
     AdjList m_list{};
     size_t m_vertexNum{};

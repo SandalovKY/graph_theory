@@ -40,22 +40,19 @@ int main(int argc, char ** argv) {
 
     adjMatrMap_type simpleOrderMap{};
     adjMatrMap_type coreNumOrderMap{};
-    // adjMatr_type myTestMatr;
     try
     {
         std::cout << "Start to input col graph files\n";
         Parser graphParser(argv[1]);
 
-        auto coreNumReordering = graphParser.getCoreNumsMaxCliqueReordering();
         auto simpleReordering = graphParser.getSimpleMaxCliqueReordering();
-        coreNumReordering = graphParser.test();
+        auto coreNumReordering = graphParser.getCoreNumsMaxCliqueReorderingMod();
 
-        adjMatrSimple = graphParser.adjList2adjMatr<bitset_type>(&simpleReordering);
-        adjMatrCoreNum = graphParser.adjList2adjMatr<bitset_type>(&coreNumReordering);
+        adjMatrSimple = graphParser.adjList2adjMatr<bitset_type>();    // removed reordering due testing of correctness
+        adjMatrCoreNum = graphParser.adjList2adjMatr<bitset_type>(&simpleReordering);
 
-        // reorderedMap = graphParser.adjList2adjMatrMap();
-        simpleOrderMap = graphParser.adjList2adjMatrMap(&simpleReordering);
-        coreNumOrderMap = graphParser.adjList2adjMatrMap(&coreNumReordering);
+        simpleOrderMap = graphParser.adjList2adjMatrMap();   // removed reordering due testing of correctness
+        coreNumOrderMap = graphParser.adjList2adjMatrMap(&simpleReordering);
 
         std::cout << "Finished files reading ---------------------\n";
 
@@ -67,12 +64,13 @@ int main(int argc, char ** argv) {
         auto start1 = std::chrono::high_resolution_clock::now();
         segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Reference);
         auto end1 = std::chrono::high_resolution_clock::now();
-        auto& res = segAlgSimpleReordering.maxClique;
+        auto& resBitset = segAlgSimpleReordering.globalMaxClique;
 
         auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg time: " << time1 << std::endl;
-        std::cout << "Results: " << res.size() << std::endl;
-        for (const auto& vert: res)
+        auto resSet = getSetBits(resBitset);
+        std::cout << "Results: " << resSet.size() << std::endl;
+        for (const auto& vert: resSet)
         {
             std::cout << vert << ' ';
         }
@@ -136,12 +134,14 @@ int main(int argc, char ** argv) {
         start1 = std::chrono::high_resolution_clock::now();
         segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Reference);
         end1 = std::chrono::high_resolution_clock::now();
-        res = segAlgCoreNumReordering.maxClique;
+        resBitset = segAlgCoreNumReordering.globalMaxClique;
 
         time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg time: " << time1 << std::endl;
-        std::cout << "Results: " << res.size() << std::endl;
-        for (const auto& vert: res)
+        resSet = getSetBits(resBitset);
+        std::cout << "Results: " << resSet.size() << std::endl;
+        auto usualOrderSer = graphParser.getDefaultOrder(simpleReordering, resSet);
+        for (const auto& vert: usualOrderSer)
         {
             std::cout << vert << ' ';
         }

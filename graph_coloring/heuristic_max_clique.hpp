@@ -3,5 +3,6 @@
 #include <map>
 #include <vector>
 #include "bitset.hpp"
+#include "segundo_max_clique.hpp"
 
-std::set<size_t> maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> adjMatr);
+SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> adjMatr);

@@ -146,6 +146,13 @@ public:
             m_block_vector[ind] = -1;
         }
     }
+    void all2zero()
+    {
+        for (size_t ind = 0; ind < m_block_num; ++ind)
+        {
+            m_block_vector[ind] = 0;
+        }
+    }
 
     m_bit_position_type num_blocks() const
     {

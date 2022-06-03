@@ -247,7 +247,7 @@ std::pair<size_t, int_fast32_t> getMinDegreeVert(std::vector<int_fast32_t>& vDeg
     return { startVert, minDegree };
 }
 
-Parser::ReorderingMap Parser::test()
+Parser::ReorderingMap Parser::getCoreNumsMaxCliqueReorderingMod()
 {
     ReorderingMap retMap{};
     std::vector<size_t> retVec = getCoreNumsOtherAlg(this->m_list);
@@ -256,6 +256,23 @@ Parser::ReorderingMap Parser::test()
         retMap[retVec[retVec.size() - (ind + 1)]] = ind;
     }
     return retMap;
+}
+
+std::set<size_t> Parser::getDefaultOrder(ReorderingMap& reorderingMap, std::set<size_t>& srcSet)
+{
+    std::set<size_t> retSet{};
+    for (const auto& vert: srcSet)
+    {
+        for (const auto& mapEl: reorderingMap)
+        {
+            if (vert == mapEl.second)
+            {
+                retSet.insert(mapEl.first);
+                break;
+            }
+        }
+    }
+    return retSet;
 }
 
 Parser::ReorderingMap Parser::getCoreNumsMaxCliqueReordering()
