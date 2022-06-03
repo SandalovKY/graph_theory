@@ -76,59 +76,6 @@ int main(int argc, char ** argv) {
         }
         std::cout << "\n-----------------\n";
 
-        // start1 = std::chrono::high_resolution_clock::now();
-        // segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::ModifiedWithInputBitset);
-        // end1 = std::chrono::high_resolution_clock::now();
-        // auto resMod = segAlgSimpleReordering.globalMaxClique;
-        // auto resSetBits = getSetBits(resMod);
-
-        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        // std::cout << "Seg alg time test: " << time1 << std::endl;
-        // std::cout << "Results: " << resSetBits.size() << std::endl;
-        // for (const auto& vert: resSetBits)
-        // {
-        //     std::cout << vert << ' ';
-        // }
-        // std::cout << "\n-----------------\n";
-
-        // start1 = std::chrono::high_resolution_clock::now();
-        // segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
-        // end1 = std::chrono::high_resolution_clock::now();
-        // res = segAlgSimpleReordering.maxClique;
-
-        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        // std::cout << "Seg alg boosted time: " << time1 << std::endl;
-        // std::cout << "Results: " << res.size() << std::endl;
-        // for (const auto& vert: res)
-        // {
-        //     std::cout << vert << ' ';
-        // }
-        // std::cout << "\n-----------------\n";
-
-        // start1 = std::chrono::high_resolution_clock::now();
-        // auto resClique = Algorithm<adjMatr_type>::maxCliqueFinding(adjMatrSimple);
-        // end1 = std::chrono::high_resolution_clock::now();
-
-        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        // std::cout << "Custom max clique greedy algorithm time: " << time1 << std::endl;
-        // size_t maxCliqueSize{ 0 };
-        // std::vector<size_t> maxCLique{};
-        // for (const auto& clique: resClique)
-        // {
-        //     if (clique.size() > maxCliqueSize)
-        //     {
-        //         maxCliqueSize = clique.size();
-        //         maxCLique = std::move(clique);
-        //     }
-        // }
-        // std::cout << "Results: " << maxCliqueSize << std::endl;
-        // std::sort(maxCLique.begin(), maxCLique.end());
-        // for (const auto& elem: maxCLique)
-        // {
-        //     std::cout << elem << ' ';
-        // }
-        // std::cout << "\n-----------------\n";
-
         std::cout << "Start with core num reordering ---------------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
@@ -147,58 +94,6 @@ int main(int argc, char ** argv) {
         }
         std::cout << "\n-----------------\n";
 
-        // start1 = std::chrono::high_resolution_clock::now();
-        // segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::ModifiedWithInputBitset);
-        // end1 = std::chrono::high_resolution_clock::now();
-        // resMod = segAlgCoreNumReordering.globalMaxClique;
-        // resSetBits = getSetBits(resMod);
-
-        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        // std::cout << "Seg alg time test: " << time1 << std::endl;
-        // std::cout << "Results: " << resSetBits.size() << std::endl;
-        // for (const auto& vert: resSetBits)
-        // {
-        //     std::cout << vert << ' ';
-        // }
-        // std::cout << "\n-----------------\n";
-
-        // start1 = std::chrono::high_resolution_clock::now();
-        // segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
-        // end1 = std::chrono::high_resolution_clock::now();
-        // res = segAlgCoreNumReordering.maxClique;
-
-        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        // std::cout << "Seg alg boosted time: " << time1 << std::endl;
-        // std::cout << "Results: " << res.size() << std::endl;
-        // for (const auto& vert: res)
-        // {
-        //     std::cout << vert << ' ';
-        // }
-        // std::cout << "\n-----------------\n";
-
-        // start1 = std::chrono::high_resolution_clock::now();
-        // resClique = Algorithm<adjMatr_type>::maxCliqueFinding(adjMatrCoreNum);
-        // end1 = std::chrono::high_resolution_clock::now();
-
-        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        // std::cout << "Custom max clique greedy algorithm time: " << time1 << std::endl;
-        // maxCliqueSize = 0;
-        // maxCLique.clear();
-        // for (const auto& clique: resClique)
-        // {
-        //     if (clique.size() > maxCliqueSize)
-        //     {
-        //         maxCliqueSize = clique.size();
-        //         maxCLique = std::move(clique);
-        //     }
-        // }
-        // std::cout << "Results: " << maxCliqueSize << std::endl;
-        // std::sort(maxCLique.begin(), maxCLique.end());
-        // for (const auto& elem: maxCLique)
-        // {
-        //     std::cout << elem << ' ';
-        // }
-        // std::cout << "\n-----------------\n";
     }
     catch(std::exception const& e)
     {
