@@ -23,6 +23,7 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms alg)
     index_lines copyMatr = this->globalAdjMatr;
     index_lines allowedMatr = this->globalAdjMatr;
     index_lines_with_order coloredMatr{};
+    std::vector<std::pair<size_t, size_t>> coloredVec{};
     // index_lines_with_order coloredMap{};
 
     bitset_type inputVerts(numBits, -1);
@@ -44,8 +45,8 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms alg)
         this->maxCliqueFindingSegundoUsingAdditionalMatrix(copyMatr, coloredMatr, defSet);
         break;
     case Algorithms::ModifiedWithInputBitset:
-        coloredMatr = this->coloringUsingAdditionalMatrix(allowedMatr, 3);
-        this->maxCliqueSegTest(inputVerts, coloredMatr, currMaxClique);
+        coloredVec = this->retColoring(inputVerts.getNeighbours(), 3);
+        this->maxCliqueSegTest(inputVerts, coloredVec, currMaxClique);
         break;
     default:
         break;
@@ -105,10 +106,44 @@ SegundoAlgorithm::index_lines_with_order SegundoAlgorithm::coloring(index_lines&
     return resColsOrdered;
 }
 
+std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::retColoring(const std::set<size_t>& currVerts, int32_t minCol)
+{
+    std::vector<std::pair<size_t, size_t>> retVector{};
+    if (this->globalAdjMatr.empty())
+    {
+        return retVector; 
+    }
+    size_t numBits{ this->globalAdjMatr.begin()->second.getDimSize() };
+
+    std::vector<bitset_type> tabuCols(currVerts.size(), bitset_type(numBits, -1));
+
+    for (auto& vert: currVerts)
+    {
+        if (vert >= numBits) break;
+        auto recordVal = this->globalAdjMatr[vert];
+        size_t recordInd = vert;
+        bitset_type tmpBitset(numBits, recordInd);
+        tmpBitset.set(recordInd);
+        int32_t color{ 0 };
+        bitset_type cmpBitset = tabuCols[color] & tmpBitset;
+        while (countSetBits(cmpBitset))
+        {
+            ++color;
+            cmpBitset = tabuCols[color] & tmpBitset;
+        }
+        tabuCols[color] |= recordVal;
+        if (color + 1 >= minCol)
+        {
+            retVector.push_back({ recordInd, color + 1 });
+        }
+    }
+
+    return retVector;
+}
+
 SegundoAlgorithm::index_lines_with_order SegundoAlgorithm::coloringUsingAdditionalMatrix(index_lines& adjMatr, int32_t minCol)
 {
     index_lines_with_order resCols{};
-    // index_lines_with_order_mm resColsMap{};
 
     size_t numBits{ 0 };
     if (!adjMatr.empty())
@@ -134,43 +169,38 @@ SegundoAlgorithm::index_lines_with_order SegundoAlgorithm::coloringUsingAddition
         tabuCols[color] |= recordVal;
         if (color + 1 >= minCol)
         {
-            // resColsMap.insert({ color + 1, recordVal });
             resCols.push_back(recordVal);
         }
     }
     return resCols;
 }
 
-void SegundoAlgorithm::maxCliqueSegTest(bitset_type searchSubgraph, index_lines_with_order& allowedVerts, bitset_type& currMaxClique)
+void SegundoAlgorithm::maxCliqueSegTest(bitset_type searchSubgraph, std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique)
 {
     ++step_count;
     while (!allowedVerts.empty())
     {
         auto currLine = allowedVerts.back();
-        // auto currLine = *(--allowedVerts.end());
-        size_t lineInd = currLine.getId();
+        size_t lineInd = currLine.first;
 
-        // allowedVerts.erase((--allowedVerts.end()));
-        // searchSubgraph.unset(lineInd);
         allowedVerts.pop_back();
 
         int32_t currCliqueSize = countSetBits(currMaxClique);
         int32_t maxCliqueSize = countSetBits(this->globalMaxClique);
 
-        if (currCliqueSize + currLine.getColor() > maxCliqueSize)
+        if (currCliqueSize + currLine.second > maxCliqueSize)
         {
             searchSubgraph.unset(lineInd);
             currMaxClique.set(lineInd);
             ++currCliqueSize;
 
-            bitset_type& line = currLine;
+            bitset_type line = this->globalAdjMatr[currLine.first];
 
             line &= searchSubgraph;
 
-            index_lines nearVerts = this->getNeighboursBitsetInput(line);
-            if (!nearVerts.empty())
+            if (countSetBits(line) > 0)
             {
-                index_lines_with_order coloredVerts = this->coloringUsingAdditionalMatrix(nearVerts, maxCliqueSize - currCliqueSize + 1);
+                std::vector<std::pair<size_t, size_t>> coloredVerts = this->retColoring(line.getNeighbours(), maxCliqueSize - currCliqueSize + 1);
                 this->maxCliqueSegTest(line, coloredVerts, currMaxClique);
             }
             else
@@ -183,7 +213,6 @@ void SegundoAlgorithm::maxCliqueSegTest(bitset_type searchSubgraph, index_lines_
             currMaxClique.unset(lineInd);
             --currCliqueSize;
         }
-        // else break;
     }
 }
 
@@ -261,7 +290,6 @@ void SegundoAlgorithm::maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<siz
             }
             currMaxCLique.erase(currLineInd);
         }
-        // else break;
     }
 }
 

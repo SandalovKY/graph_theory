@@ -106,30 +106,37 @@ Parser::ReorderingMap Parser::getSimpleMaxCliqueReordering()
 {
     ReorderingMap retMap{};
 
-    std::sort(m_list.begin(), m_list.end(), [](std::pair<size_t, std::set<size_t>>& element1, std::pair<size_t, std::set<size_t>>& element2){
+    AdjList localAdjList = m_list;
+
+    std::sort(localAdjList.begin(), localAdjList.end(), [](std::pair<size_t, std::set<size_t>>& element1, std::pair<size_t, std::set<size_t>>& element2){
         return element1.second.size() > element2.second.size();
     });
 
-    for (size_t ind = 0;ind < m_list.size(); ++ind)
+    for (size_t ind = 0;ind < localAdjList.size(); ++ind)
     {
-        retMap[m_list[ind].first] = ind;
+        retMap[localAdjList[ind].first] = ind;
     }
     return retMap;
 }
+
 
 std::vector<std::pair<size_t, int_fast32_t> > getCoreNums(std::map<size_t, std::set<size_t> > adjLists, size_t startVert, int_fast32_t minDegree, std::vector<int_fast32_t>& vDegree)
 {
     std::vector<std::pair<size_t, int_fast32_t> > retCoreNums(adjLists.size());
 
-    for (const auto& vert: adjLists)
-    {
-        retCoreNums[vert.first] = { vert.first, minDegree };
-    }
-
     bool someVertsInKcore{ true };
     
     while(someVertsInKcore)
     {
+        someVertsInKcore = false;
+        for (const auto& vert: adjLists)
+        {
+            if (vDegree[vert.first] >= minDegree)
+            {
+                someVertsInKcore = true;
+                retCoreNums[vert.first] = { vert.first, minDegree };
+            }
+        }
         std::vector<bool> isVisited(adjLists.size(), false);
         someDFS(adjLists, startVert, ++minDegree, isVisited, vDegree);
         for (const auto& vert: adjLists)
@@ -137,21 +144,52 @@ std::vector<std::pair<size_t, int_fast32_t> > getCoreNums(std::map<size_t, std::
             // For cases when graph is disconnected
             someDFS(adjLists, vert.first, minDegree, isVisited, vDegree);
         }
-        someVertsInKcore = false;
-        for (const auto& vert: adjLists)
-        {
-            if (vDegree[vert.first] >= minDegree)
-            {
-                someVertsInKcore = true;
-                retCoreNums[vert.first].second = minDegree;
-            }
-        }
+        
         int_fast32_t gotMinDegree{ 0 };
         std::tie(startVert, gotMinDegree) = getMinDegreeVert(vDegree);
         if (startVert == -1 || gotMinDegree == -1) return retCoreNums;
-        minDegree = std::max(minDegree, gotMinDegree);
+        // minDegree = std::max(minDegree, gotMinDegree);
     }
     return retCoreNums;
+}
+
+std::vector<size_t> getCoreNumsOtherAlg(std::vector<std::pair<size_t, std::set<size_t> > >& inputAdjList)
+{
+    size_t numVerts{ inputAdjList.size() };
+    std::vector<size_t> retVector;
+    retVector.reserve(numVerts);
+    std::vector<std::set<size_t>> arrayD(numVerts);
+    std::vector<int32_t> currDValues(numVerts);
+    for(const auto& vert: inputAdjList)
+    {
+        arrayD[vert.second.size()].insert(vert.first);
+        currDValues[vert.first] = vert.second.size(); 
+    }
+    size_t k{ 0 };
+
+    for (int ind = 0; ind < numVerts; ++ind)
+    {
+        size_t iter{ 0 };
+        while (arrayD[iter].size() == 0 && iter < arrayD.size()) ++iter;
+        if (iter < arrayD.size())
+        {
+            k = std::max(k, iter);
+            retVector.push_back(*arrayD[iter].begin());
+            currDValues[retVector.back()] = -1;
+            arrayD[iter].erase(arrayD[iter].begin());
+            for (const auto& nbhd: inputAdjList[retVector.back()].second)
+            {
+                int32_t currVal = currDValues[nbhd];
+                if (currVal >= 0)
+                {
+                    --currDValues[nbhd];
+                    arrayD[currVal].erase(nbhd);
+                    arrayD[currDValues[nbhd]].insert(nbhd);
+                }
+            }
+        }
+    }
+    return retVector;
 }
 
 void someDFS(std::map<size_t, std::set<size_t> >& adjLists, size_t startVert, int_fast32_t k, std::vector<bool>& isVisited, std::vector<int_fast32_t>& vDegree)
@@ -207,6 +245,17 @@ std::pair<size_t, int_fast32_t> getMinDegreeVert(std::vector<int_fast32_t>& vDeg
         }
     }
     return { startVert, minDegree };
+}
+
+Parser::ReorderingMap Parser::test()
+{
+    ReorderingMap retMap{};
+    std::vector<size_t> retVec = getCoreNumsOtherAlg(this->m_list);
+    for (size_t ind = 0; ind < retVec.size(); ++ind)
+    {
+        retMap[retVec[retVec.size() - (ind + 1)]] = ind;
+    }
+    return retMap;
 }
 
 Parser::ReorderingMap Parser::getCoreNumsMaxCliqueReordering()

@@ -52,6 +52,7 @@ public:
 
     ReorderingMap getSimpleMaxCliqueReordering();
     ReorderingMap getCoreNumsMaxCliqueReordering();
+    ReorderingMap test();
 private:
     AdjList m_list{};
     size_t m_vertexNum{};

@@ -38,7 +38,9 @@ private:
         index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
     void maxCliqueFindingSegundoUsingAdditionalMatrix(std::map<size_t, bitset_type>& adjMatr,
         index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
-    void maxCliqueSegTest(bitset_type searchSubgraph, index_lines_with_order& allowedVerts, bitset_type& currMaxClique);
+    void maxCliqueSegTest(bitset_type searchSubgraph, std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique);
     void maxCliqueFindingSegundoReference(bitset_type searchSubgraph,
     index_lines_with_order& allowedVerts, std::set<size_t>& currMaxCLique);
+
+    std::vector<std::pair<size_t, size_t>> retColoring(const std::set<size_t>& currVerts, int32_t minCol);
 };
