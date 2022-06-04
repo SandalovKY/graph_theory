@@ -40,7 +40,7 @@ Parser::Parser(char const* filename)
             size_t v_first{ static_cast<size_t>(std::stoi(parsedLine[1])) };
             size_t v_second{ static_cast<size_t>(std::stoi(parsedLine[2])) };
 
-            auto findRes = std::find_if(std::begin(m_list), std::end(m_list), [v_first](std::pair<size_t, std::set<size_t>>& element){
+            auto findRes = std::find_if(std::begin(m_list), std::end(m_list), [&](std::pair<size_t, std::set<size_t>>& element){
                 return element.first == v_first - 1;
             });
             if (findRes != std::end(m_list))
@@ -52,7 +52,7 @@ Parser::Parser(char const* filename)
                 m_list.push_back({ v_first - 1, std::set<size_t>{ v_second - 1 } });
             }
 
-            findRes = std::find_if(std::begin(m_list), std::end(m_list), [v_second](std::pair<size_t, std::set<size_t>>& element){
+            findRes = std::find_if(std::begin(m_list), std::end(m_list), [&](std::pair<size_t, std::set<size_t>>& element){
                 return element.first == v_second - 1;
             });
             if (findRes != std::end(m_list))
@@ -275,6 +275,22 @@ std::set<size_t> Parser::getDefaultOrder(ReorderingMap& reorderingMap, std::set<
     return retSet;
 }
 
+bool Parser::provedClique(const std::set<size_t>& clique)
+{
+    std::map<size_t, std::set<size_t> > localMap(m_list.begin(), m_list.end());
+    for (const auto& vert: clique)
+    {
+        for (const auto& otherVert: clique)
+        {
+            if (vert != otherVert)
+            {
+                if (localMap[vert].find(otherVert) == localMap[vert].end()) return false;
+            }
+        }
+    }
+    return true;
+}
+
 Parser::ReorderingMap Parser::getCoreNumsMaxCliqueReordering()
 {
     ReorderingMap retMap{};
@@ -293,7 +309,7 @@ Parser::ReorderingMap Parser::getCoreNumsMaxCliqueReordering()
         return element1.second > element2.second;
     });
 
-    for (size_t ind = 0;ind < coreNums.size(); ++ind)
+    for (size_t ind = 0; ind < coreNums.size(); ++ind)
     {
         retMap[coreNums[ind].first] = ind;
     }

@@ -54,6 +54,7 @@ public:
     ReorderingMap getCoreNumsMaxCliqueReordering();
     ReorderingMap getCoreNumsMaxCliqueReorderingMod();
     std::set<size_t> getDefaultOrder(ReorderingMap& reorderingMap, std::set<size_t>& srcSet);
+    bool provedClique(const std::set<size_t>& clique);
 private:
     AdjList m_list{};
     size_t m_vertexNum{};

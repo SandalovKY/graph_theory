@@ -14,9 +14,7 @@ public:
     enum Algorithms
     {
         Reference,
-        ReferenceWithInputBitset,
         Modified,
-        ModifiedWithInputBitset,
         BoostedReferenceAlgorithm,
         BoostedModifiedAlgorithm
     };
@@ -31,6 +29,6 @@ private:
     void maxCliqueFindingSegundoReference(bitset_type searchSubgraph,
     colored_verts& allowedVerts, bitset_type& currMaxClique);
 
-    colored_verts coloring(const std::set<size_t>& adjMatr, int32_t minCol, const bitset_type& currVerts);
-    colored_verts coloringModified(const std::set<size_t>& currVerts, int32_t minCol);
+    colored_verts coloringReference(bitset_type currVerts, int32_t minCol);
+    colored_verts coloringModified(bitset_type currVerts, int32_t minCol);
 };

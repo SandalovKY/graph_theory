@@ -48,11 +48,11 @@ int main(int argc, char ** argv) {
         auto simpleReordering = graphParser.getSimpleMaxCliqueReordering();
         auto coreNumReordering = graphParser.getCoreNumsMaxCliqueReorderingMod();
 
-        adjMatrSimple = graphParser.adjList2adjMatr<bitset_type>();    // removed reordering due testing of correctness
-        adjMatrCoreNum = graphParser.adjList2adjMatr<bitset_type>(&simpleReordering);
+        adjMatrSimple = graphParser.adjList2adjMatr<bitset_type>(&simpleReordering);
+        adjMatrCoreNum = graphParser.adjList2adjMatr<bitset_type>(&coreNumReordering);
 
-        simpleOrderMap = graphParser.adjList2adjMatrMap();   // removed reordering due testing of correctness
-        coreNumOrderMap = graphParser.adjList2adjMatrMap(&simpleReordering);
+        simpleOrderMap = graphParser.adjList2adjMatrMap(&simpleReordering);
+        coreNumOrderMap = graphParser.adjList2adjMatrMap(&coreNumReordering);
 
         std::cout << "Finished files reading ---------------------\n";
 
@@ -69,10 +69,39 @@ int main(int argc, char ** argv) {
         auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg time: " << time1 << std::endl;
         auto resSet = getSetBits(resBitset);
-        std::cout << "Results: " << resSet.size() << std::endl;
-        for (const auto& vert: resSet)
+        auto defOrderSet = graphParser.getDefaultOrder(simpleReordering, resSet);
+        std::cout << "Results: " << defOrderSet.size() << std::endl;
+        // for (const auto& vert: defOrderSet)
+        // {
+        //     std::cout << vert << ' ';
+        // }
+
+        std::cout << "-----------------";
+        if (graphParser.provedClique(defOrderSet))
         {
-            std::cout << vert << ' ';
+            std::cout << "\nCorrectClique";
+        }
+        std::cout << "\n-----------------\n";
+
+        start1 = std::chrono::high_resolution_clock::now();
+        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
+        end1 = std::chrono::high_resolution_clock::now();
+        resBitset = segAlgSimpleReordering.globalMaxClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        std::cout << "Seg alg time: " << time1 << std::endl;
+        resSet = getSetBits(resBitset);
+        defOrderSet = graphParser.getDefaultOrder(simpleReordering, resSet);
+        std::cout << "Results: " << defOrderSet.size() << std::endl;
+        // for (const auto& vert: defOrderSet)
+        // {
+        //     std::cout << vert << ' ';
+        // }
+
+        std::cout << "-----------------";
+        if (graphParser.provedClique(defOrderSet))
+        {
+            std::cout << "\nCorrectClique";
         }
         std::cout << "\n-----------------\n";
 
@@ -86,11 +115,39 @@ int main(int argc, char ** argv) {
         time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
         std::cout << "Seg alg time: " << time1 << std::endl;
         resSet = getSetBits(resBitset);
-        std::cout << "Results: " << resSet.size() << std::endl;
-        auto usualOrderSer = graphParser.getDefaultOrder(simpleReordering, resSet);
-        for (const auto& vert: usualOrderSer)
+        defOrderSet = graphParser.getDefaultOrder(coreNumReordering, resSet);
+        std::cout << "Results: " << defOrderSet.size() << std::endl;
+        // for (const auto& vert: defOrderSet)
+        // {
+        //     std::cout << vert << ' ';
+        // }
+
+        std::cout << "-----------------";
+        if (graphParser.provedClique(defOrderSet))
         {
-            std::cout << vert << ' ';
+            std::cout << "\nCorrectClique";
+        }
+        std::cout << "\n-----------------\n";
+
+        start1 = std::chrono::high_resolution_clock::now();
+        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
+        end1 = std::chrono::high_resolution_clock::now();
+        resBitset = segAlgCoreNumReordering.globalMaxClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        std::cout << "Seg alg time: " << time1 << std::endl;
+        resSet = getSetBits(resBitset);
+        defOrderSet = graphParser.getDefaultOrder(coreNumReordering, resSet);
+        std::cout << "Results: " << defOrderSet.size() << std::endl;
+        // for (const auto& vert: defOrderSet)
+        // {
+        //     std::cout << vert << ' ';
+        // }
+
+        std::cout << "-----------------";
+        if (graphParser.provedClique(defOrderSet))
+        {
+            std::cout << "\nCorrectClique";
         }
         std::cout << "\n-----------------\n";
 
