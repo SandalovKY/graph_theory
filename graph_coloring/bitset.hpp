@@ -175,6 +175,16 @@ public:
         return true;
     }
 
+    bool isBitSet(m_bit_position_type bitPos)
+    {
+        if (m_last_set_bit_num < bitPos) return false;
+        const m_bit_position_type block_num = bitPos / m_block_size;
+        const m_block_size_type block_offset = bitPos % m_block_size;
+
+        if (block_num >= m_block_vector.size()) return false;
+        return (m_block_vector[block_num] & (m_block_type{ 1 } << block_offset)) != 0;
+    }
+
     bool unset(m_bit_position_type bitPos)
     {
         if (m_last_set_bit_num < bitPos) return false;

@@ -1,0 +1,21 @@
+c My test matr
+p edge 10 19
+e 2 1
+e 3 1
+e 3 2
+e 4 1
+e 4 2
+e 5 1
+e 5 2
+e 6 1
+e 6 2
+e 7 1
+e 8 1
+e 8 7
+e 9 1
+e 9 7
+e 9 8
+e 10 1
+e 10 7
+e 10 8
+e 10 9

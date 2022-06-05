@@ -29,6 +29,9 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
 
     switch (algorithm)
     {
+    case Algorithms::Heuristic:
+        this->globalMaxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
+        break;
     case Algorithms::BoostedReferenceAlgorithm:
         this->globalMaxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
     case Algorithms::Reference:
@@ -92,6 +95,7 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReference(bitse
 std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringModified(bitset_type notColoredVerts, int32_t minCol)
 {
     std::vector<std::pair<size_t, size_t>> retColored{};
+    std::map<size_t, std::set<size_t>> coloredVerts{};
     if (this->globalAdjMatr.empty())
     {
         return retColored;
@@ -104,24 +108,26 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringModified(bitset
     size_t nextVert = notColoredVerts.getFirstNonZeroPosition();
     while (nextVert < numBits)
     {
-        bitset_type tmpBitset(numBits, nextVert);
-        tmpBitset.set(nextVert);
         int32_t allowedColor { 0 };
-        bitset_type cmpBitset(tabuCols[allowedColor] & tmpBitset);
-        while (countSetBits(cmpBitset) != 0)
+        while (tabuCols[allowedColor].isBitSet(nextVert))
         {
             ++allowedColor;
-            cmpBitset = tabuCols[allowedColor] & tmpBitset;
         }
         tabuCols[allowedColor] |= this->globalAdjMatr[nextVert];
         notColoredVerts.unset(nextVert);
         if (allowedColor + 1 >= minCol)
         {
-            retColored.push_back({ nextVert, allowedColor + 1 });
+            coloredVerts[allowedColor + 1].insert(nextVert);
         }
         nextVert = notColoredVerts.getFirstNonZeroPosition();
     }
-
+    for (const auto& verts: coloredVerts)
+    {
+        for (const auto& vert: verts.second)
+        {
+            retColored.push_back({ vert, verts.first });
+        }
+    }
     return retColored;
 }
 

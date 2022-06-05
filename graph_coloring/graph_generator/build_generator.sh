@@ -1,0 +1,1 @@
+g++ random_graph_generator.cpp -o graphGenerator -O3

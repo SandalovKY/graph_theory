@@ -3,9 +3,9 @@
 
 SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, myDynamicBitset<>> adjMatr)
 {
-    SegundoAlgorithm::bitset_type retBitset{};
     std::vector<std::vector<size_t>> allMaxCliques{};
     size_t dimSize = adjMatr.begin()->second.getDimSize();
+    SegundoAlgorithm::bitset_type retBitset(dimSize, -1);
 
     for (size_t ind = 0; ind < dimSize; ++ind)
     {
@@ -82,6 +82,47 @@ SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, myDynam
         }
     }
     for (const auto& vert: maxCliqueVector)
+    {
+        retBitset.set(vert);
+    }
+    return retBitset;
+}
+
+SegundoAlgorithm::bitset_type maxCliqueFindingHeuristicSimple(std::map<size_t, myDynamicBitset<>> adjMatr)
+{
+    SegundoAlgorithm::bitset_type retBitset(adjMatr.begin()->second.getDimSize(), -1);
+    if (adjMatr.empty()) return retBitset;
+
+    size_t numBits = adjMatr.begin()->second.getDimSize();
+
+    for (size_t ind = 0; ind < numBits; ++ind)
+    {
+        adjMatr[ind].unset(ind);
+    }
+
+    size_t globalMaxCliqueSize{ 0 };
+    std::set<size_t> globalMaxClique{};
+
+    for(size_t ind = 0; ind < numBits; ++ind)
+    {
+        size_t maxCliqueSize{ 1 };
+        std::set<size_t> currMaxClique{ ind };
+        SegundoAlgorithm::bitset_type nbhd(adjMatr[ind]);
+        size_t nextVert = nbhd.getFirstNonZeroPosition();
+        while (nextVert < numBits)
+        {
+            ++maxCliqueSize;
+            currMaxClique.insert(nextVert);
+            nbhd &= adjMatr[nextVert];
+            nextVert = nbhd.getFirstNonZeroPosition();
+        }
+        if (maxCliqueSize > globalMaxCliqueSize)
+        {
+            globalMaxClique = currMaxClique;
+        }
+    }
+
+    for (const auto& vert: globalMaxClique)
     {
         retBitset.set(vert);
     }

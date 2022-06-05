@@ -62,7 +62,7 @@ int main(int argc, char ** argv) {
         std::cout << "Start with simple reordering ---------------------\n";
 
         auto start1 = std::chrono::high_resolution_clock::now();
-        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Reference);
+        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedReferenceAlgorithm);
         auto end1 = std::chrono::high_resolution_clock::now();
         auto& resBitset = segAlgSimpleReordering.globalMaxClique;
 
@@ -84,7 +84,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
+        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
         end1 = std::chrono::high_resolution_clock::now();
         resBitset = segAlgSimpleReordering.globalMaxClique;
 
@@ -105,10 +105,32 @@ int main(int argc, char ** argv) {
         }
         std::cout << "\n-----------------\n";
 
+        // auto start1 = std::chrono::high_resolution_clock::now();
+        // segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Heuristic);
+        // auto end1 = std::chrono::high_resolution_clock::now();
+        // auto& resBitset = segAlgSimpleReordering.globalMaxClique;
+
+        // auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        // std::cout << "Seg alg time: " << time1 << std::endl;
+        // auto resSet = getSetBits(resBitset);
+        // auto defOrderSet = graphParser.getDefaultOrder(simpleReordering, resSet);
+        // std::cout << "Results: " << defOrderSet.size() << std::endl;
+        // // for (const auto& vert: defOrderSet)
+        // // {
+        // //     std::cout << vert << ' ';
+        // // }
+
+        // std::cout << "-----------------";
+        // if (graphParser.provedClique(defOrderSet))
+        // {
+        //     std::cout << "\nCorrectClique";
+        // }
+        // std::cout << "\n-----------------\n";
+
         std::cout << "Start with core num reordering ---------------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Reference);
+        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedReferenceAlgorithm);
         end1 = std::chrono::high_resolution_clock::now();
         resBitset = segAlgCoreNumReordering.globalMaxClique;
 
@@ -130,7 +152,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Modified);
+        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
         end1 = std::chrono::high_resolution_clock::now();
         resBitset = segAlgCoreNumReordering.globalMaxClique;
 
@@ -150,6 +172,28 @@ int main(int argc, char ** argv) {
             std::cout << "\nCorrectClique";
         }
         std::cout << "\n-----------------\n";
+
+        // start1 = std::chrono::high_resolution_clock::now();
+        // segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Heuristic);
+        // end1 = std::chrono::high_resolution_clock::now();
+        // resBitset = segAlgCoreNumReordering.globalMaxClique;
+
+        // time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        // std::cout << "Seg alg time: " << time1 << std::endl;
+        // resSet = getSetBits(resBitset);
+        // defOrderSet = graphParser.getDefaultOrder(coreNumReordering, resSet);
+        // std::cout << "Results: " << defOrderSet.size() << std::endl;
+        // // for (const auto& vert: defOrderSet)
+        // // {
+        // //     std::cout << vert << ' ';
+        // // }
+
+        // std::cout << "-----------------";
+        // if (graphParser.provedClique(defOrderSet))
+        // {
+        //     std::cout << "\nCorrectClique";
+        // }
+        // std::cout << "\n-----------------\n";
 
     }
     catch(std::exception const& e)
