@@ -5,7 +5,9 @@
 #include <stdexcept>
 #include <set>
 
-template <typename BlockType = uint64_t>
+using block_type = unsigned long long;
+
+template <typename BlockType = block_type>
 class myDynamicBitset
 {
 public:

@@ -46,7 +46,7 @@ int main(int argc, char ** argv) {
         Parser graphParser(argv[1]);
 
         auto simpleReordering = graphParser.getSimpleMaxCliqueReordering();
-        auto coreNumReordering = graphParser.getCoreNumsMaxCliqueReorderingMod();
+        auto coreNumReordering = graphParser.getCoreNumsMaxCliqueReordering();
 
         adjMatrSimple = graphParser.adjList2adjMatr<bitset_type>(&simpleReordering);
         adjMatrCoreNum = graphParser.adjList2adjMatr<bitset_type>(&coreNumReordering);
@@ -62,7 +62,7 @@ int main(int argc, char ** argv) {
         std::cout << "Start with simple reordering ---------------------\n";
 
         auto start1 = std::chrono::high_resolution_clock::now();
-        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedReferenceAlgorithm);
+        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Heuristic);
         auto end1 = std::chrono::high_resolution_clock::now();
         auto& resBitset = segAlgSimpleReordering.globalMaxClique;
 
@@ -84,7 +84,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
+        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::SimpleHeuristic);
         end1 = std::chrono::high_resolution_clock::now();
         resBitset = segAlgSimpleReordering.globalMaxClique;
 
@@ -104,6 +104,17 @@ int main(int argc, char ** argv) {
             std::cout << "\nCorrectClique";
         }
         std::cout << "\n-----------------\n";
+
+        start1 = std::chrono::high_resolution_clock::now();
+        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BronKerboschAlgorithm);
+        end1 = std::chrono::high_resolution_clock::now();
+
+        size_t bronKerbosch = segAlgSimpleReordering.maximalKerboshClique;
+
+        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
+        std::cout << "Bron Kerbosch alg time: " << time1 << std::endl;
+        std::cout << "Results: " << bronKerbosch << std::endl;
+        std::cout << "-----------------\n";
 
         // auto start1 = std::chrono::high_resolution_clock::now();
         // segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Heuristic);
@@ -130,7 +141,7 @@ int main(int argc, char ** argv) {
         std::cout << "Start with core num reordering ---------------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedReferenceAlgorithm);
+        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Heuristic);
         end1 = std::chrono::high_resolution_clock::now();
         resBitset = segAlgCoreNumReordering.globalMaxClique;
 
@@ -152,7 +163,7 @@ int main(int argc, char ** argv) {
         std::cout << "\n-----------------\n";
 
         start1 = std::chrono::high_resolution_clock::now();
-        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::BoostedModifiedAlgorithm);
+        segAlgCoreNumReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::SimpleHeuristic);
         end1 = std::chrono::high_resolution_clock::now();
         resBitset = segAlgCoreNumReordering.globalMaxClique;
 

@@ -15,7 +15,6 @@ class GraphVisualization:
         graph = nx.Graph()
         graph.add_edges_from(self.visual)
         nx.draw_networkx(graph)
-        sns.set()
         plt.show()
 
 

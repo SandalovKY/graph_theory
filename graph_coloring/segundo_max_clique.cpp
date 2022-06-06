@@ -27,10 +27,16 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     bitset_type currMaxClique(numBits, -1);
     inputVerts.all2one();
 
+    bitset_type brKerbCurrClique(numBits, -1);
+    bitset_type brKerbtabu(numBits, -1);
+
     switch (algorithm)
     {
     case Algorithms::Heuristic:
         this->globalMaxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
+        break;
+    case Algorithms::SimpleHeuristic:
+        this->globalMaxClique = maxCliqueFindingHeuristicSimple(this->globalAdjMatr);
         break;
     case Algorithms::BoostedReferenceAlgorithm:
         this->globalMaxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
@@ -43,6 +49,9 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     case Algorithms::Modified:
         coloredVec = this->coloringModified(inputVerts, 3);
         this->maxCliqueFindingSegundoModified(inputVerts, coloredVec, currMaxClique);
+        break;
+    case Algorithms::BronKerboschAlgorithm:
+        this->bronKerbosch(brKerbCurrClique, inputVerts, brKerbtabu);
         break;
     default:
         break;
@@ -138,7 +147,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgrap
     {
         auto currLine = allowedVerts.back();
         size_t currlineInd = currLine.first;
-        // searchSubgraph.unset(currlineInd);
+        searchSubgraph.unset(currlineInd);
 
         allowedVerts.pop_back();
 
@@ -147,7 +156,6 @@ void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgrap
 
         if (currCliqueSize + currLine.second > maxCliqueSize)
         {
-            searchSubgraph.unset(currlineInd);
             currMaxClique.set(currlineInd);
             ++currCliqueSize;
 
@@ -169,7 +177,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgrap
             currMaxClique.unset(currlineInd);
             --currCliqueSize;
         }
-        // else break;
+        else break;
     }
 }
 
@@ -214,4 +222,33 @@ void SegundoAlgorithm::maxCliqueFindingSegundoReference(bitset_type searchSubgra
         }
         else break;
     }
+}
+
+size_t SegundoAlgorithm::bronKerbosch(bitset_type& currClique, bitset_type& remainingNodes, bitset_type& skipNodes, size_t depth)
+{
+    if (this->globalAdjMatr.empty()) return 0;
+    size_t numBits = this->globalAdjMatr.begin()->second.getDimSize();
+    if (remainingNodes.getFirstNonZeroPosition() >= numBits && skipNodes.getFirstNonZeroPosition() >= numBits)
+    {
+        size_t currCliqueSize = countSetBits(currClique);
+        this->maximalKerboshClique = std::max(currCliqueSize, this->maximalKerboshClique);
+        return 1;
+    }
+
+    size_t foundCliques{ 0 };
+
+    size_t nextVert = remainingNodes.getFirstNonZeroPosition();
+    while (nextVert < numBits)
+    {
+        bitset_type newCurrClique = currClique;
+        newCurrClique.set(nextVert);
+        bitset_type newRemainingNodes = remainingNodes & this->globalAdjMatr[nextVert];
+        bitset_type newSkipNodes = skipNodes & this->globalAdjMatr[nextVert];
+        foundCliques += bronKerbosch(newCurrClique, newRemainingNodes, newSkipNodes, depth + 1);
+
+        remainingNodes.unset(nextVert);
+        skipNodes.set(nextVert);
+        nextVert = remainingNodes.getFirstNonZeroPosition();
+    }
+    return foundCliques;
 }

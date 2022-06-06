@@ -52,7 +52,6 @@ public:
 
     ReorderingMap getSimpleMaxCliqueReordering();
     ReorderingMap getCoreNumsMaxCliqueReordering();
-    ReorderingMap getCoreNumsMaxCliqueReorderingMod();
     std::set<size_t> getDefaultOrder(ReorderingMap& reorderingMap, std::set<size_t>& srcSet);
     bool provedClique(const std::set<size_t>& clique);
 private:
