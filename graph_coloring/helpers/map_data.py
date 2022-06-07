@@ -26,12 +26,12 @@ while len(next_line) != 0:
 
 file.close()
 
-mapped_file = open("mapped_file", 'w')
-for vert in retMap:
-    mapped_file.write(str(retMap[vert]) + ' ' + str(vert) + '\n')
-mapped_file.close()
+# mapped_file = open("mapped_file", 'w')
+# for vert in retMap:
+#     mapped_file.write(str(retMap[vert]) + ' ' + str(vert) + '\n')
+# mapped_file.close()
 
-updated_file = open("updated_file", 'w')
+updated_file = open(path_to_file + '_reordered', 'w')
 for edge in retList:
     updated_file.write('e ' + str(retMap[edge[0]]) + ' ' + str(retMap[edge[1]]) + '\n')
 updated_file.close()

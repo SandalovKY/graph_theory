@@ -237,7 +237,14 @@ size_t SegundoAlgorithm::bronKerbosch(bitset_type& currClique, bitset_type& rema
 
     size_t foundCliques{ 0 };
 
-    size_t nextVert = remainingNodes.getFirstNonZeroPosition();
+    SegundoAlgorithm::bitset_type pivotSet(remainingNodes | skipNodes);
+
+    size_t pivotVert = pivotSet.getFirstNonZeroPosition();
+    SegundoAlgorithm::bitset_type uNbhd(this->globalAdjMatr[pivotVert]);
+    ~uNbhd;
+    uNbhd &= remainingNodes;
+
+    size_t nextVert = uNbhd.getFirstNonZeroPosition();
     while (nextVert < numBits)
     {
         bitset_type newCurrClique = currClique;
@@ -248,7 +255,8 @@ size_t SegundoAlgorithm::bronKerbosch(bitset_type& currClique, bitset_type& rema
 
         remainingNodes.unset(nextVert);
         skipNodes.set(nextVert);
-        nextVert = remainingNodes.getFirstNonZeroPosition();
+        uNbhd.unset(nextVert);
+        nextVert = uNbhd.getFirstNonZeroPosition();
     }
     return foundCliques;
 }
