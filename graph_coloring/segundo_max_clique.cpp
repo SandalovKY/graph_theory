@@ -72,29 +72,25 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReference(bitse
 
     bitset_type localVerts(currVerts);
     size_t nextVert = localVerts.getFirstNonZeroPosition();
+    bitset_type coloredVerts(numBits, -1);
+    coloredVerts.all2one();
 
     while (nextVert < numBits)
     {
-        bitset_type coloredVerts(numBits, -1);
-        std::set<size_t> vertsWithCurrColor{};
         while (nextVert < numBits)
         {
             localVerts.unset(nextVert);
-            coloredVerts.set(nextVert);
-            vertsWithCurrColor.insert(nextVert);
-            bitset_type vertLine = this->globalAdjMatr[nextVert];
-            localVerts = localVerts & ~(vertLine);
+            coloredVerts.unset(nextVert);
+            if (currColor >= minCol)
+            {
+                retColored.push_back({ nextVert, currColor });
+            }
+            localVerts &= ~(this->globalAdjMatr[nextVert]);
+            ~(this->globalAdjMatr[nextVert]);
             nextVert = localVerts.getFirstNonZeroPosition();
         }
-        currVerts &= ~coloredVerts;
+        currVerts &= coloredVerts;
         localVerts = currVerts;
-        if (currColor >= minCol)
-        {
-            for (const auto& vert: vertsWithCurrColor)
-            {
-                retColored.push_back({ vert, currColor });
-            }
-        }
         nextVert = localVerts.getFirstNonZeroPosition();
         ++currColor;
     }
