@@ -5,12 +5,13 @@
 
 int32_t step_count{ 0 };
 
-SegundoAlgorithm::SegundoAlgorithm(indexed_lines adjMatr)
-    : globalAdjMatr(std::move(adjMatr))
+SegundoAlgorithm::SegundoAlgorithm(indexed_lines adjMatr, std::map<size_t, boost::dynamic_bitset<> > adjMatrBoost)
+    : globalAdjMatr(std::move(adjMatr)), globalAdjMatrBoost(std::move(adjMatrBoost))
 {
     if (!globalAdjMatr.empty())
     {
         this->globalMaxClique = bitset_type(globalAdjMatr.begin()->second.getDimSize(), -1);
+        this->boostBitset = boost::dynamic_bitset<>(globalAdjMatr.begin()->second.getDimSize());
     }
 }
 
@@ -27,6 +28,10 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     bitset_type currMaxClique(numBits, -1);
     inputVerts.all2one();
 
+    boost::dynamic_bitset<> inputVertsBoost(numBits);
+    boost::dynamic_bitset<> currMaxCliqueBoost(numBits);
+    inputVertsBoost.set();
+
     bitset_type brKerbCurrClique(numBits, -1);
     bitset_type brKerbtabu(numBits, -1);
 
@@ -38,11 +43,16 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     case Algorithms::SimpleHeuristic:
         this->globalMaxClique = maxCliqueFindingHeuristicSimple(this->globalAdjMatr);
         break;
-    case Algorithms::BoostedReferenceAlgorithm:
-        this->globalMaxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
+    case Algorithms::HeuristicUsingBoost:
+        this->boostBitset = maxCliqueFindingHeuristicSimpleBoost(this->globalAdjMatrBoost);
+        break;
     case Algorithms::Reference:
         coloredVec = this->coloringReference(inputVerts, 3);
         this->maxCliqueFindingSegundoReference(inputVerts, coloredVec, currMaxClique);
+        break;
+    case Algorithms::ReferenceUsingBoost:
+        coloredVec = this->coloringReferenceBoost(inputVertsBoost, 3);
+        this->maxCliqueFindingSegundoReferenceBoost(inputVertsBoost, coloredVec, currMaxCliqueBoost);
         break;
     case Algorithms::BoostedModifiedAlgorithm:
         this->globalMaxClique = maxCliqueFindingHeuristic(this->globalAdjMatr);
@@ -92,6 +102,43 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReference(bitse
         currVerts &= coloredVerts;
         localVerts = currVerts;
         nextVert = localVerts.getFirstNonZeroPosition();
+        ++currColor;
+    }
+    return retColored;
+}
+
+std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReferenceBoost(boost::dynamic_bitset<> currVerts, int32_t minCol)
+{
+    std::vector<std::pair<size_t, size_t>> retColored{};
+    if (this->globalAdjMatrBoost.empty())
+    {
+        return retColored;
+    }
+    size_t numBits{ this->globalAdjMatrBoost.begin()->second.size() };
+
+    int32_t currColor{ 1 };
+
+    boost::dynamic_bitset<> localVerts(currVerts);
+    size_t nextVert = localVerts.find_first();
+    boost::dynamic_bitset<> coloredVerts(numBits);
+    coloredVerts.set();
+
+    while (nextVert < numBits)
+    {
+        while (nextVert < numBits)
+        {
+            localVerts.set(nextVert, false);
+            coloredVerts.set(nextVert, false);
+            if (currColor >= minCol)
+            {
+                retColored.push_back({ nextVert, currColor });
+            }
+            localVerts &= ~(this->globalAdjMatrBoost[nextVert]);
+            nextVert = localVerts.find_first();
+        }
+        currVerts &= coloredVerts;
+        localVerts = currVerts;
+        nextVert = localVerts.find_first();
         ++currColor;
     }
     return retColored;
@@ -214,6 +261,48 @@ void SegundoAlgorithm::maxCliqueFindingSegundoReference(bitset_type searchSubgra
                 }
             }
             currMaxClique.unset(currLineInd);
+            --currCliqueSize;
+        }
+        else break;
+    }
+}
+
+void SegundoAlgorithm::maxCliqueFindingSegundoReferenceBoost(boost::dynamic_bitset<> searchSubgraph, colored_verts& allowedVerts, boost::dynamic_bitset<>& currMaxClique)
+{
+    ++step_count;
+    while (!allowedVerts.empty())
+    {
+        auto currLine = allowedVerts.back();
+        size_t currLineInd = currLine.first;
+
+        allowedVerts.pop_back();
+        searchSubgraph.set(currLineInd, false);
+
+        int32_t currCliqueSize = currMaxClique.count();
+        int32_t maxCliqueSize = this->boostBitset.count();
+        
+        if (currCliqueSize + currLine.second > maxCliqueSize)
+        {
+            currMaxClique.set(currLineInd);
+            ++currCliqueSize;
+
+            boost::dynamic_bitset<> line = this->globalAdjMatrBoost[currLine.first];
+            line &= searchSubgraph;
+
+            if (line.count() != 0)
+            {
+                std::vector<std::pair<size_t, size_t>> coloredVerts = this->coloringReferenceBoost(line,
+                    static_cast<int32_t>(maxCliqueSize - currCliqueSize + 1));
+                maxCliqueFindingSegundoReferenceBoost(line, coloredVerts, currMaxClique);
+            }
+            else
+            {
+                if (currCliqueSize > maxCliqueSize)
+                {
+                    this->boostBitset = currMaxClique;
+                }
+            }
+            currMaxClique.set(currLineInd, false);
             --currCliqueSize;
         }
         else break;

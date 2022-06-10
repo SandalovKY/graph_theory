@@ -102,6 +102,38 @@ Parser::adjList2adjMatrMap(ReorderingMap* map2Reorder)
     return retMap;
 }
 
+typename std::map<size_t, boost::dynamic_bitset<>>
+Parser::adjList2adjMatrMapBoost(ReorderingMap* map2Reorder)
+{
+    std::map<size_t, boost::dynamic_bitset<> > retMap{};
+    size_t numBits = m_list.size();
+    if (map2Reorder != nullptr)
+    {
+        for (auto& vertex: m_list)
+        {
+            size_t currVertId{ (*map2Reorder)[vertex.first] };
+            retMap.insert({ currVertId, boost::dynamic_bitset<>(numBits) });
+            for(const auto& adjacent: vertex.second)
+            {
+                retMap[currVertId].set((*map2Reorder)[adjacent]);
+            }
+        }
+    }
+    else
+    {
+        for (const auto& vertex: m_list)
+        {
+            size_t currVertId = vertex.first;
+            retMap.insert({ currVertId, boost::dynamic_bitset<>(numBits) });
+            for(const auto& adjacent: vertex.second)
+            {
+                retMap[currVertId].set(adjacent);
+            }
+        }
+    }
+    return retMap;
+}
+
 Parser::ReorderingMap Parser::getSimpleMaxCliqueReordering()
 {
     ReorderingMap retMap{};

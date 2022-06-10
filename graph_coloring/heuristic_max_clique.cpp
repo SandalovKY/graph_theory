@@ -108,3 +108,40 @@ SegundoAlgorithm::bitset_type maxCliqueFindingHeuristicSimple(std::map<size_t, m
     }
     return globalMaxClique;
 }
+
+boost::dynamic_bitset<> maxCliqueFindingHeuristicSimpleBoost(std::map<size_t, boost::dynamic_bitset<>> adjMatr)
+{
+    if (adjMatr.empty()) return boost::dynamic_bitset();
+
+    size_t numBits = adjMatr.begin()->second.size();
+
+    for (size_t ind = 0; ind < numBits; ++ind)
+    {
+        adjMatr[ind].set(ind, false);
+    }
+
+    size_t globalMaxCliqueSize{ 0 };
+    boost::dynamic_bitset<> globalMaxClique{};
+
+    for(size_t ind = 0; ind < numBits; ++ind)
+    {
+        size_t maxCliqueSize{ 1 };
+        boost::dynamic_bitset<> currMaxClique(numBits);
+        currMaxClique.set(ind, true);
+        boost::dynamic_bitset<> nbhd(adjMatr[ind]);
+        size_t nextVert = nbhd.find_first();
+        while (nextVert < numBits)
+        {
+            ++maxCliqueSize;
+            currMaxClique.set(nextVert);
+            nbhd &= adjMatr[nextVert];
+            nextVert = nbhd.find_first();
+        }
+        if (maxCliqueSize > globalMaxCliqueSize)
+        {
+            globalMaxClique = currMaxClique;
+            globalMaxCliqueSize = maxCliqueSize;
+        }
+    }
+    return globalMaxClique;
+}

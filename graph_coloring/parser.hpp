@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include "boost/dynamic_bitset/dynamic_bitset.hpp"
 
 class Parser
 {
@@ -49,6 +50,9 @@ public:
 
     typename std::map<size_t, myDynamicBitset<>>
     adjList2adjMatrMap(ReorderingMap* map2Reorder = nullptr);
+
+    typename std::map<size_t, boost::dynamic_bitset<>>
+    adjList2adjMatrMapBoost(ReorderingMap* map2Reorder = nullptr);
 
     ReorderingMap getSimpleMaxCliqueReordering();
     ReorderingMap getCoreNumsMaxCliqueReordering();
