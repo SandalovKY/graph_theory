@@ -70,17 +70,17 @@ Parser::Parser(char const* filename)
     }
 }
 
-typename std::map<size_t, myDynamicBitset<>>
+typename std::map<size_t, myBitset<>>
 Parser::adjList2adjMatrMap(ReorderingMap* map2Reorder)
 {
-    std::map<size_t, myDynamicBitset<>> retMap{};
+    std::map<size_t, myBitset<>> retMap{};
     size_t numBits = m_list.size();
     if (map2Reorder != nullptr)
     {
         for (auto& vertex: m_list)
         {
             size_t currVertId{ (*map2Reorder)[vertex.first] };
-            retMap.insert({ currVertId, myDynamicBitset<>(numBits, currVertId) });
+            retMap.insert({ currVertId, myBitset<>(numBits) });
             for(const auto& adjacent: vertex.second)
             {
                 retMap[currVertId].set((*map2Reorder)[adjacent]);
@@ -92,7 +92,7 @@ Parser::adjList2adjMatrMap(ReorderingMap* map2Reorder)
         for (const auto& vertex: m_list)
         {
             size_t currVertId = vertex.first;
-            retMap.insert({ currVertId, myDynamicBitset<>(numBits, currVertId) });
+            retMap.insert({ currVertId, myBitset<>(numBits) });
             for(const auto& adjacent: vertex.second)
             {
                 retMap[currVertId].set(adjacent);

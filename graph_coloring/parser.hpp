@@ -48,7 +48,7 @@ public:
         return adjMatrRet;
     }
 
-    typename std::map<size_t, myDynamicBitset<>>
+    typename std::map<size_t, myBitset<>>
     adjList2adjMatrMap(ReorderingMap* map2Reorder = nullptr);
 
     typename std::map<size_t, boost::dynamic_bitset<>>

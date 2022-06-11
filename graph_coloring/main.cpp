@@ -32,10 +32,9 @@ int main(int argc, char ** argv) {
         return EXIT_FAILURE;
     }
 
-    using bitset_type = myDynamicBitset<>;
+    using bitset_type = myBitset<>;
     using adjMatr_type = BitAdjacencyMatrix<bitset_type>; 
-    using adjMatrMap_type = std::map<size_t, myDynamicBitset<>>;
-    adjMatr_type adjMatrSimple;
+    using adjMatrMap_type = std::map<size_t, myBitset<>>;
     adjMatr_type adjMatrCoreNum;
 
     adjMatrMap_type simpleOrderMap{};
@@ -48,8 +47,6 @@ int main(int argc, char ** argv) {
         auto simpleReordering = graphParser.getSimpleMaxCliqueReordering();
         auto coreNumReordering = graphParser.getCoreNumsMaxCliqueReordering();
 
-        adjMatrSimple = graphParser.adjList2adjMatr<bitset_type>(&simpleReordering);
-        adjMatrCoreNum = graphParser.adjList2adjMatr<bitset_type>(&coreNumReordering);
 
         simpleOrderMap = graphParser.adjList2adjMatrMap(&simpleReordering);
         coreNumOrderMap = graphParser.adjList2adjMatrMap(&coreNumReordering);
@@ -57,8 +54,8 @@ int main(int argc, char ** argv) {
 
         std::cout << "---------- Finished files reading ----------\n";
 
-        SegundoAlgorithm segAlgSimpleReordering(simpleOrderMap, simpleOrderMapBoost);
-        SegundoAlgorithm segAlgCoreNumReordering(coreNumOrderMap, simpleOrderMapBoost);
+        SegundoAlgorithm segAlgSimpleReordering(simpleOrderMap);
+        SegundoAlgorithm segAlgCoreNumReordering(coreNumOrderMap);
 
         std::cout << "---------- Start with simple reordering ----------\n";
 
@@ -160,50 +157,6 @@ int main(int argc, char ** argv) {
         // std::cout << "Bron Kerbosch alg time: " << time1 << std::endl;
         // std::cout << "Results: " << bronKerbosch << std::endl;
         // std::cout << "-----------------\n";
-
-        auto start1 = std::chrono::high_resolution_clock::now();
-        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::Reference);
-        auto end1 = std::chrono::high_resolution_clock::now();
-        auto& resBitset = segAlgSimpleReordering.globalMaxClique;
-
-        auto time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        std::cout << "Seg alg heuristic time: " << time1 << std::endl;
-        auto resSet = getSetBits(resBitset);
-        auto defOrderSet = graphParser.getDefaultOrder(simpleReordering, resSet);
-        std::cout << "Results: " << defOrderSet.size() << std::endl;
-        // for (const auto& vert: defOrderSet)
-        // {
-        //     std::cout << vert << ' ';
-        // }
-
-        std::cout << "-----------------";
-        if (graphParser.provedClique(defOrderSet))
-        {
-            std::cout << "\nCorrectClique";
-        }
-        std::cout << "\n-----------------\n";
-
-        start1 = std::chrono::high_resolution_clock::now();
-        segAlgSimpleReordering.runTestAlgorithm(SegundoAlgorithm::Algorithms::ReferenceUsingBoost);
-        end1 = std::chrono::high_resolution_clock::now();
-        auto& resBitsetBoost = segAlgSimpleReordering.boostBitset;
-
-        time1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start1).count();
-        std::cout << "Seg alg heuristic using boost time: " << time1 << std::endl;
-        // resSet = getSetBits(resBitset);
-        // defOrderSet = graphParser.getDefaultOrder(simpleReordering, resSet);
-        std::cout << "Results: " << resBitsetBoost.count() << std::endl;
-        // for (const auto& vert: defOrderSet)
-        // {
-        //     std::cout << vert << ' ';
-        // }
-
-        // std::cout << "-----------------";
-        // if (graphParser.provedClique(defOrderSet))
-        // {
-        //     std::cout << "\nCorrectClique";
-        // }
-        // std::cout << "\n-----------------\n";
 
         // std::cout << "---------- Start with core num reordering ----------\n";
 

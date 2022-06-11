@@ -6,9 +6,13 @@
 #include <set>
 
 using block_type = unsigned long long;
+namespace
+{
+    static const int64_t npos = -1;
+}
 
 template <typename BlockType = block_type>
-class myDynamicBitset
+class myBitset
 {
 public:
     using m_block_type = BlockType;
@@ -18,14 +22,11 @@ public:
     using m_block_const_iterator_type = typename std::vector<m_block_type>::const_iterator;
 private:
     static const int64_t min_num_blocks = 100;
-    static const int64_t npos = -1;
 
     m_bit_position_type m_block_num{};
     m_bit_position_type m_last_set_bit_num{}; 
     m_block_size_type m_block_size{};
     std::vector<m_block_type> m_block_vector{};
-    size_t m_id{};
-    size_t m_color{};
     size_t m_dimSize{};
 
     static bool inline m_block_not_empty(const m_block_type& block)
@@ -39,29 +40,26 @@ private:
     }
 
 public:
-    myDynamicBitset()
+    myBitset()
         : m_block_size(sizeof(m_block_type) * 8),
           m_last_set_bit_num(-1),
           m_block_num(0),
           m_block_vector(min_num_blocks, 0)
     {}
 
-    myDynamicBitset(m_bit_position_type numBits, size_t currVertexId)
+    myBitset(m_bit_position_type numBits)
         : m_block_size(sizeof(m_block_type) * 8),
           m_last_set_bit_num(numBits - 1),
           m_block_num(numBits / (sizeof(m_block_type) * 8) + 1),
           m_block_vector(m_block_num, 0),
-          m_dimSize(numBits),
-          m_id(currVertexId)
+          m_dimSize(numBits)
     {}
 
-    myDynamicBitset(myDynamicBitset&& other)
+    myBitset(myBitset&& other)
         : m_block_vector(std::move(other.m_block_vector)),
           m_last_set_bit_num(other.m_last_set_bit_num),
           m_block_num(other.m_block_num),
           m_block_size(other.m_block_size),
-          m_id(other.m_id),
-          m_color(other.m_color),
           m_dimSize(other.m_dimSize)
     {
         other.m_last_set_bit_num = -1;
@@ -69,56 +67,42 @@ public:
         other.m_block_size = 0;
     }
 
-    myDynamicBitset(const myDynamicBitset& other)
+    myBitset(const myBitset& other)
         : m_block_vector(other.m_block_vector),
           m_last_set_bit_num(other.m_last_set_bit_num),
           m_block_num(other.m_block_num),
           m_block_size(other.m_block_size),
-          m_id(other.m_id),
-          m_color(other.m_color),
           m_dimSize(other.m_dimSize)
     {}
 
-    void setId(size_t id) { m_id = id; }
-    size_t getId() const { return m_id; }
-
-    void setColor(size_t color) { m_color = color; }
-    size_t getColor() const { return m_color; }
-
     size_t getDimSize() const { return m_dimSize; }
 
-    void operator=(myDynamicBitset&& other)
+    void operator=(myBitset&& other)
     {
         m_block_vector = std::move(other.m_block_vector);
 
         m_last_set_bit_num = other.m_last_set_bit_num;
         m_block_num = other.m_block_num;
         m_block_size = other.m_block_size;
-        m_id = other.m_id;
-        m_color = other.m_color;
         m_dimSize = other.m_dimSize;
 
         other.m_last_set_bit_num = -1;
         other.m_block_num = 0;
         other.m_block_size = 0;
-        other.m_id = 0;
-        other.m_color = 0;
         other.m_dimSize = 0;
     }
 
-    void operator=(const myDynamicBitset& other)
+    void operator=(const myBitset& other)
     {
         m_block_vector = other.m_block_vector;
 
         m_last_set_bit_num = other.m_last_set_bit_num;
         m_block_num = other.m_block_num;
         m_block_size = other.m_block_size;
-        m_id = other.m_id;
-        m_color = other.m_color;
         m_dimSize = other.m_dimSize;
     }
 
-    friend bool operator==(const myDynamicBitset& l, const myDynamicBitset& r)
+    friend bool operator==(const myBitset& l, const myBitset& r)
     {
         if (l.m_last_set_bit_num != r.m_last_set_bit_num ||
             l.m_block_num != r.m_block_num) return false;
@@ -156,7 +140,7 @@ public:
         }
     }
 
-    m_bit_position_type num_blocks() const
+    m_bit_position_type numBlocks() const
     {
         return m_block_num;
     }
@@ -201,7 +185,7 @@ public:
     std::set<size_t> getNeighbours()
     {
         std::set<size_t> ret;
-        myDynamicBitset tmp = *this;
+        myBitset tmp = *this;
         size_t adjVert = tmp.getFirstNonZeroPosition();
         while(adjVert <= tmp.m_last_set_bit_num)
         {
@@ -212,7 +196,7 @@ public:
         return ret;
     }
     
-    friend size_t countSetBits(const myDynamicBitset& bitset)
+    friend size_t countSetBits(const myBitset& bitset)
     {
         size_t count{ 0 };
         for (const auto& block : bitset.m_block_vector)
@@ -225,7 +209,7 @@ public:
     m_bit_position_type getFirstNonZeroPosition() const
     {
         m_bit_position_type i = std::distance(m_block_vector.begin(), std::find_if(m_block_vector.begin(), m_block_vector.end(), m_block_not_empty));
-        if (i >= num_blocks())
+        if (i >= numBlocks())
         {
             return npos;
         }
@@ -242,7 +226,7 @@ public:
         return m_block_vector.cend();
     }
 
-    myDynamicBitset& operator&=(const myDynamicBitset& other)
+    myBitset& operator&=(const myBitset& other)
     {
         if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
         for(size_t block = 0; block < this->m_block_num; ++block)
@@ -252,14 +236,14 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator&(myDynamicBitset& lhs, const myDynamicBitset& rhs)
+    friend myBitset operator&(myBitset& lhs, const myBitset& rhs)
     {
-        myDynamicBitset tmp{ lhs };
+        myBitset tmp{ lhs };
         tmp &= rhs;
         return tmp;
     }
 
-    myDynamicBitset& operator|=(const myDynamicBitset& other)
+    myBitset& operator|=(const myBitset& other)
     {
         if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
         for(size_t block = 0; block < this->m_block_num; ++block)
@@ -269,14 +253,14 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator|(myDynamicBitset& lhs, const myDynamicBitset& rhs)
+    friend myBitset operator|(myBitset& lhs, const myBitset& rhs)
     {
-        myDynamicBitset tmp{ lhs };
+        myBitset tmp{ lhs };
         tmp |= rhs;
         return tmp;
     }
 
-    myDynamicBitset& operator^=(const myDynamicBitset& other)
+    myBitset& operator^=(const myBitset& other)
     {
         if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
         for(size_t block = 0; block < this->m_block_num; ++block)
@@ -286,14 +270,14 @@ public:
         return *this;
     }
 
-    friend myDynamicBitset operator^(myDynamicBitset& lhs, const myDynamicBitset& rhs)
+    friend myBitset operator^(myBitset& lhs, const myBitset& rhs)
     {
-        myDynamicBitset tmp{ lhs };
+        myBitset tmp{ lhs };
         tmp ^= rhs;
         return tmp;
     }
 
-    myDynamicBitset& operator~()
+    myBitset& operator~()
     {
         for(size_t block = 0; block < this->m_block_num; ++block)
         {
@@ -302,19 +286,19 @@ public:
         return *this;
     }
 
-    ~myDynamicBitset()
+    ~myBitset()
     {}
 
-    friend std::ostream& operator<<(std::ostream& os, const myDynamicBitset& data)
+    friend std::ostream& operator<<(std::ostream& os, const myBitset& data)
     {
-        myDynamicBitset::m_block_type tmpBlockPos{0};
+        myBitset::m_block_type tmpBlockPos{0};
         for (size_t block = 0; block < data.m_block_num; ++block)
         {
             if (data.m_last_set_bit_num / ((block + 1) * data.m_block_size) > 0)
             {
                 while (tmpBlockPos < data.m_block_size)
                 {
-                    os << ((data.m_block_vector[block] & (static_cast<myDynamicBitset::m_block_type>(1) << tmpBlockPos)) >> tmpBlockPos++) << ' ';
+                    os << ((data.m_block_vector[block] & (static_cast<myBitset::m_block_type>(1) << tmpBlockPos)) >> tmpBlockPos++) << ' ';
                 }
                 tmpBlockPos = 0;
             }
@@ -323,7 +307,7 @@ public:
                 size_t lastBits = data.m_last_set_bit_num % ((block + 1) * data.m_block_size);
                 while (tmpBlockPos <= lastBits)
                 {
-                    os << ((data.m_block_vector[block] & (static_cast<myDynamicBitset::m_block_type>(1) << tmpBlockPos)) >> tmpBlockPos++) << ' ';
+                    os << ((data.m_block_vector[block] & (static_cast<myBitset::m_block_type>(1) << tmpBlockPos)) >> tmpBlockPos++) << ' ';
                 }
                 tmpBlockPos = 0;
             }

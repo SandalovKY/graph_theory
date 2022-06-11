@@ -61,7 +61,7 @@ public:
         int currVertexId{ 0 };
         for (auto & vertex : m_matrix)
         {
-            vertex = NeighboursList(vertex_num, currVertexId++);
+            vertex = NeighboursList(vertex_num);
         }
     }
 
