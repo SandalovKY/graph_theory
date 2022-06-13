@@ -47,7 +47,10 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     //     this->m_boostBitset = maxCliqueFindingHeuristicSimpleBoost(this->m_globalAdjMatrBoost);
     //     break;
     case Algorithms::BoostedReference:
-        this->m_globalMaxClique = maxCliqueFindingHeuristic(this->m_globalAdjMatr);
+        if (this->m_use_simple_heuristic)
+            this->m_globalMaxClique = maxCliqueFindingHeuristicSimple(this->m_globalAdjMatr);
+        else
+            this->m_globalMaxClique = maxCliqueFindingHeuristic(this->m_globalAdjMatr);
     case Algorithms::Reference:
         coloredVec = this->coloringReference(inputVerts, 3);
         this->maxCliqueFindingSegundoReference(inputVerts, coloredVec, currMaxClique);
@@ -57,7 +60,10 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     //     this->maxCliqueFindingSegundoReferenceBoost(inputVertsBoost, coloredVec, currMaxCliqueBoost);
     //     break;
     case Algorithms::BoostedModified:
-        this->m_globalMaxClique = maxCliqueFindingHeuristic(this->m_globalAdjMatr);
+        if (this->m_use_simple_heuristic)
+            this->m_globalMaxClique = maxCliqueFindingHeuristicSimple(this->m_globalAdjMatr);
+        else
+            this->m_globalMaxClique = maxCliqueFindingHeuristic(this->m_globalAdjMatr);
     case Algorithms::Modified:
         coloredVec = this->coloringModified(inputVerts, 3);
         this->maxCliqueFindingSegundoModified(inputVerts, coloredVec, currMaxClique);

@@ -3,28 +3,27 @@
 
 SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, SegundoAlgorithm::bitset_type> adjMatr)
 {
-    std::vector<SegundoAlgorithm::bitset_type> allMaxCliques{};
     size_t dimSize = adjMatr.begin()->second.getDimSize();
 
     for (size_t ind = 0; ind < dimSize; ++ind)
     {
         adjMatr[ind].unset(ind);
     }
-
+    SegundoAlgorithm::bitset_type maxClique(dimSize);
     size_t maxCliqueSize{ 0 };
 
     for(size_t ind = 0; ind < dimSize; ++ind)
     {
-        bool isFinished{ false };
-        size_t iter { 0 };
-        while (!isFinished)
+        size_t currCliqueSize{ 0 };
+        auto pathBitset = adjMatr[ind];
+        if (countSetBits(pathBitset) + 1 > maxCliqueSize)
         {
-            auto pathBitset = adjMatr[ind];
             auto curBitset = pathBitset;
             SegundoAlgorithm::bitset_type cliqueBitset(dimSize);
             cliqueBitset.set(ind);
+            ++currCliqueSize;
             size_t adjVert = curBitset.getFirstNonZeroPosition();
-            while (adjVert < dimSize)
+            while (adjVert < dimSize && currCliqueSize + countSetBits(pathBitset) > maxCliqueSize)
             {
                 size_t nextVert{ adjVert };
                 curBitset.unset(adjVert);
@@ -42,31 +41,16 @@ SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, Segundo
                     otherVert = curBitset.getFirstNonZeroPosition();
                 }
                 cliqueBitset.set(nextVert);
+                ++currCliqueSize;
                 pathBitset &= adjMatr[nextVert];
                 adjVert = pathBitset.getFirstNonZeroPosition();
                 curBitset = pathBitset;
             }
-            ++iter;
-            size_t currCliqueSize{ countSetBits(cliqueBitset) };
             if (currCliqueSize > maxCliqueSize)
             {
-                allMaxCliques.push_back(cliqueBitset);
+                maxClique = cliqueBitset;
                 maxCliqueSize = currCliqueSize;
             }
-            if (iter == 1) isFinished = true;
-        }
-    }
-
-    SegundoAlgorithm::bitset_type maxClique{};
-    size_t currMaxCliqueSize{ 0 };
-
-    for (const auto& clique: allMaxCliques)
-    {
-        size_t currCliqueSize{ countSetBits(clique) };
-        if (currCliqueSize > currMaxCliqueSize)
-        {
-            currMaxCliqueSize = currCliqueSize;
-            maxClique = clique;
         }
     }
     return maxClique;
@@ -93,7 +77,7 @@ SegundoAlgorithm::bitset_type maxCliqueFindingHeuristicSimple(std::map<size_t, m
         currMaxClique.set(ind);
         SegundoAlgorithm::bitset_type nbhd(adjMatr[ind]);
         size_t nextVert = nbhd.getFirstNonZeroPosition();
-        while (nextVert < numBits)
+        while (nextVert < numBits && maxCliqueSize + countSetBits(nbhd) > globalMaxCliqueSize)
         {
             ++maxCliqueSize;
             currMaxClique.set(nextVert);

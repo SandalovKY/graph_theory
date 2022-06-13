@@ -27,6 +27,7 @@ public:
 
     bitset_type m_globalMaxClique{};
     indexed_lines m_globalAdjMatr{};
+    bool m_use_simple_heuristic{ false };
 
     // boost::dynamic_bitset<> m_boostBitset{};
     // std::map<size_t, boost::dynamic_bitset<> > m_globalAdjMatrBoost{};
