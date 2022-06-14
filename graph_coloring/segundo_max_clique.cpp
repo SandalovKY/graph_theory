@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-int32_t step_count{ 0 };
+// int32_t step_count{ 0 };
 
 SegundoAlgorithm::SegundoAlgorithm(indexed_lines adjMatr)
     : m_globalAdjMatr(std::move(adjMatr))
@@ -20,7 +20,7 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     if (this->m_globalAdjMatr.empty()) return;
 
     this->m_globalMaxClique.all2zero();
-    step_count = 0;
+    m_step_count = 0;
     size_t numBits{ this->m_globalMaxClique.getDimSize() };
     std::vector<std::pair<size_t, size_t>> coloredVec{};
 
@@ -74,7 +74,7 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     default:
         break;
     }
-    std::cout << "Num steps: " << step_count << std::endl;
+    std::cout << "Num steps: " << m_step_count << std::endl;
 }
 
 std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReference(bitset_type currVerts, int32_t minCol)
@@ -193,7 +193,7 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringModified(bitset
 
 void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgraph, std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique)
 {
-    ++step_count;
+    ++m_step_count;
     while (!allowedVerts.empty())
     {
         auto currLine = allowedVerts.back();
@@ -235,7 +235,7 @@ void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgrap
 void SegundoAlgorithm::maxCliqueFindingSegundoReference(bitset_type searchSubgraph,
     std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique)
 {
-    ++step_count;
+    ++m_step_count;
     while (!allowedVerts.empty())
     {
         auto currLine = allowedVerts.back();

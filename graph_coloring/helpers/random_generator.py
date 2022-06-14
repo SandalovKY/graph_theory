@@ -6,9 +6,9 @@ from numpy import double
 
 if len(sys.argv) < 3: sys.exit()
 numEdges = int(sys.argv[1])
-density = double(sys.argv[2])
+density = int(sys.argv[2])
 
-g = networkx.generators.erdos_renyi_graph(numEdges, density)
+g = networkx.generators.barabasi_albert_graph(numEdges, density)
 
-networkx.write_edgelist(g, 'rand_g_' + str(numEdges) + '_' + str(density))
+networkx.write_edgelist(g, 'barabasi_rand_' + str(numEdges) + '_' + str(density))
 plt.show()
