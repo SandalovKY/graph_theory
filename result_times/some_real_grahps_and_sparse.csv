@@ -1,0 +1,11 @@
+../real_life_graphs/deezer.clq,37,11,64,11,51,20,51,20
+../real_life_graphs/deezer_large.clq,143,416,212,416,217,747,199,747
+../real_life_graphs/facebook_artists.clq,148,355,223,355,232,436,216,436
+../real_life_graphs/facebook_news.clq,34,31,83,31,64,31,81,31
+../real_life_graphs/git.clq,59,24,112,24,90,24,91,24
+../real_life_graphs/my_friends_vk.clq,0,76,1,76,0,55,1,55
+../real_life_graphs/twitch_es.clq,2,134,7,134,8,188,8,188
+../generated_graphs/rand_g_10000_0.08,25776,1993866,22335,1993866,25699,1971541,22441,1971541
+../generated_graphs/rand_g_10000_0.09,40135,2889509,33885,2889509,41678,2890123,33779,2890123
+../dimacs/hamming10-2.clq,34,1036,390,1036,47,512,208,512
+../dimacs/p_hat1000-1.clq,460,179804,657,179804,466,173358,640,173358

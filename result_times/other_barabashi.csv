@@ -1,0 +1,7 @@
+../generated_graphs/barabasi_rand_10000_3017.clq,440,2069,2277,2069,2140,8143,5236,8143
+../generated_graphs/barabasi_rand_10000_10.clq,19,724,26,724,27,690,25,690
+../generated_graphs/barabasi_rand_10000_100.clq,65,607,119,607,121,562,109,562
+../helpers/barabasi_rand_30_5.clq,0,5,0,5,0,8,0,8
+../helpers/barabasi_rand_30_15.clq,0,16,0,16,0,18,0,18
+../helpers/barabasi_rand_30_25.clq,0,6,0,6,0,6,0,6
+../helpers/barabasi_rand_30_3.clq,0,4,0,4,0,4,0,4
