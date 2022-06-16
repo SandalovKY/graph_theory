@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <set>
+#include <omp.h>
 
 #ifdef _WIN32
 #include <intrin.h>
@@ -137,14 +138,16 @@ public:
 
     void all2one()
     {
-        for (size_t ind = 0; ind < m_block_num; ++ind)
+        // #pragma omp parallel for
+        for (int64_t ind = 0; ind < m_block_num; ++ind)
         {
             m_block_vector[ind] = -1;
         }
     }
     void all2zero()
     {
-        for (size_t ind = 0; ind < m_block_num; ++ind)
+        // #pragma omp parallel for
+        for (int64_t ind = 0; ind < m_block_num; ++ind)
         {
             m_block_vector[ind] = 0;
         }
@@ -209,12 +212,13 @@ public:
     friend size_t countSetBits(const myBitset& bitset)
     {
         size_t count{ 0 };
-        for (const auto& block : bitset.m_block_vector)
+        // #pragma omp parallel for reduction(+:count)
+        for (int64_t block = 0; block < bitset.m_block_num; ++block)
         {
 #ifdef _WIN32
-            count += __popcnt64(block);
+            count += __popcnt64(bitset.m_block_vector[block]);
 #else
-            count += __builtin_popcountll(block);
+            count += __builtin_popcountll(bitset.m_block_vector[block]);
 #endif
         }
         return count;
@@ -243,7 +247,8 @@ public:
     myBitset& operator&=(const myBitset& other)
     {
         if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
-        for(size_t block = 0; block < this->m_block_num; ++block)
+        // #pragma omp parallel for
+        for(int64_t block = 0; block < this->m_block_num; ++block)
         {
             this->m_block_vector[block] &= other.m_block_vector[block];
         }
@@ -260,7 +265,8 @@ public:
     myBitset& operator|=(const myBitset& other)
     {
         if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
-        for(size_t block = 0; block < this->m_block_num; ++block)
+        // #pragma omp parallel for
+        for(int64_t block = 0; block < this->m_block_num; ++block)
         {
             this->m_block_vector[block] |= other.m_block_vector[block];
         }
@@ -277,7 +283,8 @@ public:
     myBitset& operator^=(const myBitset& other)
     {
         if (this->m_block_num != other.m_block_num) throw std::runtime_error("Cannot to operate bitsets with different block nums.");
-        for(size_t block = 0; block < this->m_block_num; ++block)
+        // #pragma omp parallel for
+        for(int64_t block = 0; block < this->m_block_num; ++block)
         {
             this->m_block_vector[block] ^= other.m_block_vector[block];
         }
@@ -293,7 +300,8 @@ public:
 
     myBitset& operator~()
     {
-        for(size_t block = 0; block < this->m_block_num; ++block)
+        // #pragma omp parallel for
+        for(int64_t block = 0; block < this->m_block_num; ++block)
         {
             this->m_block_vector[block] = ~(this->m_block_vector[block]);
         }
