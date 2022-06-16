@@ -28,7 +28,7 @@ SegundoAlgorithm::bitset_type maxCliqueFindingHeuristic(std::map<size_t, Segundo
                 size_t nextVert{ adjVert };
                 curBitset.unset(adjVert);
                 size_t numNbr{ countSetBits(adjMatr[adjVert] & pathBitset) };
-                size_t otherVert{ curBitset.getFirstNonZeroPosition() };
+                size_t otherVert{ static_cast<size_t>(curBitset.getFirstNonZeroPosition()) };
                 while (otherVert < dimSize)
                 {
                     size_t numNbrForOtherVert = countSetBits(adjMatr[otherVert] & pathBitset);

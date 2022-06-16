@@ -5,6 +5,10 @@
 #include <stdexcept>
 #include <set>
 
+#ifdef _WIN32
+#include <intrin.h>
+#endif
+
 using block_type = unsigned long long;
 namespace
 {
@@ -16,7 +20,7 @@ class myBitset
 {
 public:
     using m_block_type = BlockType;
-    using m_block_size_type = uint16_t;
+    using m_block_size_type = unsigned long;
     using m_bit_position_type = int32_t;
     using m_block_iterator_type = typename std::vector<m_block_type>::iterator;
     using m_block_const_iterator_type = typename std::vector<m_block_type>::const_iterator;
@@ -36,7 +40,13 @@ private:
 
     static m_block_size_type inline getLowestBit(const m_block_type& block)
     {
+#ifdef _WIN32
+        m_block_size_type trailingZero{ 0 };
+        _BitScanForward64(&trailingZero, block);
+        return trailingZero;
+#else
         return __builtin_ctzll(block);
+#endif
     }
 
 public:
@@ -201,7 +211,11 @@ public:
         size_t count{ 0 };
         for (const auto& block : bitset.m_block_vector)
         {
+#ifdef _WIN32
+            count += __popcnt64(block);
+#else
             count += __builtin_popcountll(block);
+#endif
         }
         return count;
     }
