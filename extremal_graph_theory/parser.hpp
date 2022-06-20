@@ -16,7 +16,7 @@ public:
     using ReorderingMap = std::map<size_t, size_t>;
     using AdjList = std::vector<std::pair<size_t, std::set<size_t> > >;
 
-    Parser(char const* filename);
+    Parser(std::string filename);
 
     template <typename ListType>
     BitAdjacencyMatrix<ListType>
@@ -48,11 +48,38 @@ public:
         return adjMatrRet;
     }
 
-    typename std::map<size_t, myBitset<>>
-    adjList2adjMatrMap(ReorderingMap* map2Reorder = nullptr);
-
-    typename std::map<size_t, boost::dynamic_bitset<>>
-    adjList2adjMatrMapBoost(ReorderingMap* map2Reorder = nullptr);
+    template<typename bitsetType>
+    typename std::map<size_t, bitsetType>
+    adjList2adjMatrMap(ReorderingMap* map2Reorder = nullptr)
+    {
+        std::map<size_t, bitsetType> retMap{};
+        size_t numBits = m_list.size();
+        if (map2Reorder != nullptr)
+        {
+            for (auto& vertex: m_list)
+            {
+                size_t currVertId{ (*map2Reorder)[vertex.first] };
+                retMap.insert({ currVertId, bitsetType(numBits) });
+                for(const auto& adjacent: vertex.second)
+                {
+                    retMap[currVertId].set((*map2Reorder)[adjacent]);
+                }
+            }
+        }
+        else
+        {
+            for (const auto& vertex: m_list)
+            {
+                size_t currVertId = vertex.first;
+                retMap.insert({ currVertId, bitsetType(numBits) });
+                for(const auto& adjacent: vertex.second)
+                {
+                    retMap[currVertId].set(adjacent);
+                }
+            }
+        }
+        return retMap;
+    }
 
     ReorderingMap getSimpleMaxCliqueReordering();
     ReorderingMap getCoreNumsMaxCliqueReordering();

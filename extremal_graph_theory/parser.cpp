@@ -2,7 +2,7 @@
 
 std::vector<size_t> getCoreNums(std::vector<std::pair<size_t, std::set<size_t> > >& inputAdjList);
 
-Parser::Parser(char const* filename)
+Parser::Parser(std::string filename)
 {
     std::ifstream inputFile(filename);
     if (inputFile.is_open())
@@ -68,70 +68,7 @@ Parser::Parser(char const* filename)
             boost::split(parsedLine, line, [](char c){ return c == ' '; });
         }
     }
-}
-
-typename std::map<size_t, myBitset<>>
-Parser::adjList2adjMatrMap(ReorderingMap* map2Reorder)
-{
-    std::map<size_t, myBitset<>> retMap{};
-    size_t numBits = m_list.size();
-    if (map2Reorder != nullptr)
-    {
-        for (auto& vertex: m_list)
-        {
-            size_t currVertId{ (*map2Reorder)[vertex.first] };
-            retMap.insert({ currVertId, myBitset<>(numBits) });
-            for(const auto& adjacent: vertex.second)
-            {
-                retMap[currVertId].set((*map2Reorder)[adjacent]);
-            }
-        }
-    }
-    else
-    {
-        for (const auto& vertex: m_list)
-        {
-            size_t currVertId = vertex.first;
-            retMap.insert({ currVertId, myBitset<>(numBits) });
-            for(const auto& adjacent: vertex.second)
-            {
-                retMap[currVertId].set(adjacent);
-            }
-        }
-    }
-    return retMap;
-}
-
-typename std::map<size_t, boost::dynamic_bitset<>>
-Parser::adjList2adjMatrMapBoost(ReorderingMap* map2Reorder)
-{
-    std::map<size_t, boost::dynamic_bitset<> > retMap{};
-    size_t numBits = m_list.size();
-    if (map2Reorder != nullptr)
-    {
-        for (auto& vertex: m_list)
-        {
-            size_t currVertId{ (*map2Reorder)[vertex.first] };
-            retMap.insert({ currVertId, boost::dynamic_bitset<>(numBits) });
-            for(const auto& adjacent: vertex.second)
-            {
-                retMap[currVertId].set((*map2Reorder)[adjacent]);
-            }
-        }
-    }
-    else
-    {
-        for (const auto& vertex: m_list)
-        {
-            size_t currVertId = vertex.first;
-            retMap.insert({ currVertId, boost::dynamic_bitset<>(numBits) });
-            for(const auto& adjacent: vertex.second)
-            {
-                retMap[currVertId].set(adjacent);
-            }
-        }
-    }
-    return retMap;
+    else throw std::runtime_error(filename.append(": incorrect filename"));
 }
 
 Parser::ReorderingMap Parser::getSimpleMaxCliqueReordering()
@@ -153,6 +90,7 @@ Parser::ReorderingMap Parser::getSimpleMaxCliqueReordering()
 
 std::vector<size_t> getCoreNums(std::vector<std::pair<size_t, std::set<size_t> > >& inputAdjList)
 {
+    std::map<size_t, std::vector<size_t> > retMap{};
     size_t numVerts{ inputAdjList.size() };
     std::vector<size_t> retVector;
     retVector.reserve(numVerts);
@@ -172,10 +110,10 @@ std::vector<size_t> getCoreNums(std::vector<std::pair<size_t, std::set<size_t> >
         if (iter < arrayD.size())
         {
             k = std::max(k, iter);
-            retVector.push_back(*arrayD[iter].begin());
-            currDValues[retVector.back()] = -1;
+            retMap[k].push_back(*arrayD[iter].begin());
+            currDValues[retMap[k].back()] = -1;
             arrayD[iter].erase(arrayD[iter].begin());
-            for (const auto& nbhd: inputAdjList[retVector.back()].second)
+            for (const auto& nbhd: inputAdjList[retMap[k].back()].second)
             {
                 int32_t currVal = currDValues[nbhd];
                 if (currVal >= 0)
@@ -186,6 +124,14 @@ std::vector<size_t> getCoreNums(std::vector<std::pair<size_t, std::set<size_t> >
                 }
             }
         }
+    }
+
+    for (auto& el: retMap)
+    {
+        std::sort(el.second.begin(), el.second.end(), [&](const size_t& l, const size_t& r){
+            return inputAdjList[l].second.size() < inputAdjList[r].second.size();
+        });
+        retVector.insert(retVector.end(), el.second.begin(), el.second.end());
     }
     return retVector;
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(Graph_coloring VERSION 1.1)
+project(MaximumClique VERSION 1.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -9,7 +9,7 @@ if(CMAKE_SYSTEM MATCHES Windows)
     add_compile_options(/O2 /openmp)
 endif()
 if(CMAKE_SYSTEM MATCHES Linux)
-    add_compile_options(-march=native -O3 -fopenmp)
+    add_compile_options(-march=native -O3)
 endif()
 set(Boost_USE_STATIC_LIBS ON)
 
@@ -22,9 +22,9 @@ endif()
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable(Graph_coloring ${src_graph})
+add_executable(MaximumClique ${src_graph})
 
-target_link_libraries(Graph_coloring LINK_PUBLIC
+target_link_libraries(MaximumClique LINK_PUBLIC
                       ${Boost_LIBRARIES})
-target_include_directories(Graph_coloring PUBLIC
+target_include_directories(MaximumClique PUBLIC
                            "${PROJECT_BINARY_DIR}")

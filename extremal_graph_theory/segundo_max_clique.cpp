@@ -1,21 +1,56 @@
 #include "segundo_max_clique.hpp"
 #include "heuristic_max_clique.hpp"
 
-#include <iostream>
+template<>
+SegundoAlgorithm<boost::dynamic_bitset<> >::SegundoAlgorithm(indexed_lines adjMatr)
+    : m_globalAdjMatr(std::move(adjMatr))
+{
+    if (!m_globalAdjMatr.empty())
+    {
+        this->m_globalMaxClique = bitset_type(m_globalAdjMatr.begin()->second.size());
+    }
+}
 
-// int32_t step_count{ 0 };
+template<>
+void SegundoAlgorithm<boost::dynamic_bitset<> >::runAlgorithm(Algorithms algorithm)
+{
+    if (this->m_globalAdjMatr.empty()) return;
 
-SegundoAlgorithm::SegundoAlgorithm(indexed_lines adjMatr)
+    this->m_globalMaxClique.set(false);
+    m_step_count = 0;
+    size_t numBits{ this->m_globalMaxClique.size() };
+    std::vector<std::pair<size_t, size_t>> coloredVec{};
+
+    bitset_type inputVerts(numBits);
+    bitset_type currMaxClique(numBits);
+    inputVerts.set();
+
+    switch (algorithm)
+    {
+    case Algorithms::HeuristicUsingBoost:
+        this->m_globalMaxClique = maxCliqueFindingHeuristicSimpleBoost(this->m_globalAdjMatr);
+        break;
+    case Algorithms::ReferenceUsingBoost:
+        coloredVec = this->coloringReferenceBoost(inputVerts, 3);
+        this->maxCliqueFindingSegundoReferenceBoost(inputVerts, coloredVec, currMaxClique);
+        break;
+    default:
+        break;
+    }
+}
+
+template<>
+SegundoAlgorithm<myBitset<> >::SegundoAlgorithm(indexed_lines adjMatr)
     : m_globalAdjMatr(std::move(adjMatr))
 {
     if (!m_globalAdjMatr.empty())
     {
         this->m_globalMaxClique = bitset_type(m_globalAdjMatr.begin()->second.getDimSize());
-        // this->m_boostBitset = boost::dynamic_bitset<>(m_globalAdjMatr.begin()->second.getDimSize());
     }
 }
 
-void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
+template<>
+void SegundoAlgorithm<myBitset<> >::runAlgorithm(Algorithms algorithm)
 {
     if (this->m_globalAdjMatr.empty()) return;
 
@@ -28,10 +63,6 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     bitset_type currMaxClique(numBits);
     inputVerts.all2one();
 
-    // boost::dynamic_bitset<> inputVertsBoost(numBits);
-    // boost::dynamic_bitset<> currMaxCliqueBoost(numBits);
-    // inputVertsBoost.set();
-
     bitset_type brKerbCurrClique(numBits);
     bitset_type brKerbtabu(numBits);
 
@@ -43,9 +74,6 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     case Algorithms::SimpleHeuristic:
         this->m_globalMaxClique = maxCliqueFindingHeuristicSimple(this->m_globalAdjMatr);
         break;
-    // case Algorithms::HeuristicUsingBoost:
-    //     this->m_boostBitset = maxCliqueFindingHeuristicSimpleBoost(this->m_globalAdjMatrBoost);
-    //     break;
     case Algorithms::BoostedReference:
         if (this->m_use_simple_heuristic)
             this->m_globalMaxClique = maxCliqueFindingHeuristicSimple(this->m_globalAdjMatr);
@@ -55,10 +83,6 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
         coloredVec = this->coloringReference(inputVerts, 3);
         this->maxCliqueFindingSegundoReference(inputVerts, coloredVec, currMaxClique);
         break;
-    // case Algorithms::ReferenceUsingBoost:
-    //     coloredVec = this->coloringReferenceBoost(inputVertsBoost, 3);
-    //     this->maxCliqueFindingSegundoReferenceBoost(inputVertsBoost, coloredVec, currMaxCliqueBoost);
-    //     break;
     case Algorithms::BoostedModified:
         if (this->m_use_simple_heuristic)
             this->m_globalMaxClique = maxCliqueFindingHeuristicSimple(this->m_globalAdjMatr);
@@ -74,10 +98,10 @@ void SegundoAlgorithm::runTestAlgorithm(Algorithms algorithm)
     default:
         break;
     }
-    std::cout << "Num steps: " << m_step_count << std::endl;
 }
 
-std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReference(bitset_type currVerts, int32_t minCol)
+template<>
+SegundoAlgorithm<myBitset<> >::colored_verts SegundoAlgorithm<myBitset<> >::coloringReference(bitset_type currVerts, int32_t minCol)
 {
     std::vector<std::pair<size_t, size_t>> retColored{};
     if (this->m_globalAdjMatr.empty())
@@ -115,44 +139,47 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReference(bitse
     return retColored;
 }
 
-// std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringReferenceBoost(boost::dynamic_bitset<> currVerts, int32_t minCol)
-// {
-//     std::vector<std::pair<size_t, size_t>> retColored{};
-//     if (this->m_globalAdjMatrBoost.empty())
-//     {
-//         return retColored;
-//     }
-//     size_t numBits{ this->m_globalAdjMatrBoost.begin()->second.size() };
+template<>
+SegundoAlgorithm<boost::dynamic_bitset<> >::colored_verts
+SegundoAlgorithm<boost::dynamic_bitset<> >::coloringReferenceBoost(boost::dynamic_bitset<> currVerts, int32_t minCol)
+{
+    std::vector<std::pair<size_t, size_t>> retColored{};
+    if (this->m_globalAdjMatr.empty())
+    {
+        return retColored;
+    }
+    size_t numBits{ this->m_globalAdjMatr.begin()->second.size() };
 
-//     int32_t currColor{ 1 };
+    int32_t currColor{ 1 };
 
-//     boost::dynamic_bitset<> localVerts(currVerts);
-//     size_t nextVert = localVerts.find_first();
-//     boost::dynamic_bitset<> coloredVerts(numBits);
-//     coloredVerts.set();
+    boost::dynamic_bitset<> localVerts(currVerts);
+    size_t nextVert = localVerts.find_first();
+    boost::dynamic_bitset<> coloredVerts(numBits);
+    coloredVerts.set();
 
-//     while (nextVert < numBits)
-//     {
-//         while (nextVert < numBits)
-//         {
-//             localVerts.set(nextVert, false);
-//             coloredVerts.set(nextVert, false);
-//             if (currColor >= minCol)
-//             {
-//                 retColored.push_back({ nextVert, currColor });
-//             }
-//             localVerts &= ~(this->m_globalAdjMatrBoost[nextVert]);
-//             nextVert = localVerts.find_first();
-//         }
-//         currVerts &= coloredVerts;
-//         localVerts = currVerts;
-//         nextVert = localVerts.find_first();
-//         ++currColor;
-//     }
-//     return retColored;
-// }
+    while (nextVert < numBits)
+    {
+        while (nextVert < numBits)
+        {
+            localVerts.set(nextVert, false);
+            coloredVerts.set(nextVert, false);
+            if (currColor >= minCol)
+            {
+                retColored.push_back({ nextVert, currColor });
+            }
+            localVerts &= ~(this->m_globalAdjMatr[nextVert]);
+            nextVert = localVerts.find_first();
+        }
+        currVerts &= coloredVerts;
+        localVerts = currVerts;
+        nextVert = localVerts.find_first();
+        ++currColor;
+    }
+    return retColored;
+}
 
-std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringModified(bitset_type notColoredVerts, int32_t minCol)
+template<>
+SegundoAlgorithm<myBitset<> >::colored_verts SegundoAlgorithm<myBitset<> >::coloringModified(bitset_type notColoredVerts, int32_t minCol)
 {
     std::vector<std::pair<size_t, size_t>> retColored{};
     std::map<size_t, std::set<size_t>> coloredVerts{};
@@ -191,7 +218,9 @@ std::vector<std::pair<size_t, size_t>> SegundoAlgorithm::coloringModified(bitset
     return retColored;
 }
 
-void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgraph, std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique)
+template<>
+void SegundoAlgorithm<myBitset<> >::maxCliqueFindingSegundoModified(bitset_type searchSubgraph,
+    std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique)
 {
     ++m_step_count;
     while (!allowedVerts.empty())
@@ -232,7 +261,8 @@ void SegundoAlgorithm::maxCliqueFindingSegundoModified(bitset_type searchSubgrap
     }
 }
 
-void SegundoAlgorithm::maxCliqueFindingSegundoReference(bitset_type searchSubgraph,
+template<>
+void SegundoAlgorithm<myBitset<> >::maxCliqueFindingSegundoReference(bitset_type searchSubgraph,
     std::vector<std::pair<size_t, size_t>>& allowedVerts, bitset_type& currMaxClique)
 {
     ++m_step_count;
@@ -275,49 +305,53 @@ void SegundoAlgorithm::maxCliqueFindingSegundoReference(bitset_type searchSubgra
     }
 }
 
-// void SegundoAlgorithm::maxCliqueFindingSegundoReferenceBoost(boost::dynamic_bitset<> searchSubgraph, colored_verts& allowedVerts, boost::dynamic_bitset<>& currMaxClique)
-// {
-//     ++step_count;
-//     while (!allowedVerts.empty())
-//     {
-//         auto currLine = allowedVerts.back();
-//         size_t currLineInd = currLine.first;
+template<>
+void SegundoAlgorithm<boost::dynamic_bitset<> >::maxCliqueFindingSegundoReferenceBoost(bitset_type searchSubgraph,
+    colored_verts& allowedVerts, bitset_type& currMaxClique)
+{
+    ++m_step_count;
+    while (!allowedVerts.empty())
+    {
+        auto currLine = allowedVerts.back();
+        size_t currLineInd = currLine.first;
 
-//         allowedVerts.pop_back();
-//         searchSubgraph.set(currLineInd, false);
+        allowedVerts.pop_back();
+        searchSubgraph.set(currLineInd, false);
 
-//         int32_t currCliqueSize = currMaxClique.count();
-//         int32_t maxCliqueSize = this->m_boostBitset.count();
+        int32_t currCliqueSize = currMaxClique.count();
+        int32_t maxCliqueSize = this->m_globalMaxClique.count();
         
-//         if (currCliqueSize + currLine.second > maxCliqueSize)
-//         {
-//             currMaxClique.set(currLineInd);
-//             ++currCliqueSize;
+        if (currCliqueSize + currLine.second > maxCliqueSize)
+        {
+            currMaxClique.set(currLineInd);
+            ++currCliqueSize;
 
-//             boost::dynamic_bitset<> line = this->m_globalAdjMatrBoost[currLine.first];
-//             line &= searchSubgraph;
+            boost::dynamic_bitset<> line = this->m_globalAdjMatr[currLine.first];
+            line &= searchSubgraph;
 
-//             if (line.count() != 0)
-//             {
-//                 std::vector<std::pair<size_t, size_t>> coloredVerts = this->coloringReferenceBoost(line,
-//                     static_cast<int32_t>(maxCliqueSize - currCliqueSize + 1));
-//                 maxCliqueFindingSegundoReferenceBoost(line, coloredVerts, currMaxClique);
-//             }
-//             else
-//             {
-//                 if (currCliqueSize > maxCliqueSize)
-//                 {
-//                     this->m_boostBitset = currMaxClique;
-//                 }
-//             }
-//             currMaxClique.set(currLineInd, false);
-//             --currCliqueSize;
-//         }
-//         else break;
-//     }
-// }
+            if (line.count() != 0)
+            {
+                std::vector<std::pair<size_t, size_t>> coloredVerts = this->coloringReferenceBoost(line,
+                    static_cast<int32_t>(maxCliqueSize - currCliqueSize + 1));
+                maxCliqueFindingSegundoReferenceBoost(line, coloredVerts, currMaxClique);
+            }
+            else
+            {
+                if (currCliqueSize > maxCliqueSize)
+                {
+                    this->m_globalMaxClique = currMaxClique;
+                }
+            }
+            currMaxClique.set(currLineInd, false);
+            --currCliqueSize;
+        }
+        else break;
+    }
+}
 
-size_t SegundoAlgorithm::bronKerbosch(bitset_type& currClique, bitset_type& remainingNodes, bitset_type& skipNodes, size_t depth)
+template<>
+size_t SegundoAlgorithm<myBitset<> >::bronKerbosch(bitset_type& currClique,
+    bitset_type& remainingNodes, bitset_type& skipNodes, size_t depth)
 {
     if (this->m_globalAdjMatr.empty()) return 0;
     size_t numBits = this->m_globalAdjMatr.begin()->second.getDimSize();
